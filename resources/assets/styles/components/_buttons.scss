@@ -1,0 +1,126 @@
+.btn,
+.button {
+  @apply bg-gray-300 border border-solid border-transparent text-black px-3 py-1;
+
+  &.btn-sm {
+    @apply text-sm px-2;
+  }
+
+  svg {
+    @apply inline-block;
+  }
+
+  &:hover {
+    @apply bg-gray-400;
+  }
+
+  transition: 0.2s ease;
+
+  &:disabled,
+  &.disabled {
+    @apply bg-gray-200 text-gray-500 cursor-not-allowed;
+  }
+
+  //=======
+  // Styles
+  //=====
+  &.btn-outline {
+    @apply bg-transparent;
+  }
+
+  &.btn-dark {
+    @apply bg-gray-700 text-white border-gray-700;
+
+    &:hover {
+      @apply bg-gray-800;
+    }
+
+    &.selected {
+      @apply bg-blue-700 text-white border-blue-700;
+    }
+
+    //disabled is same as default
+
+    &.btn-outline {
+      @apply bg-transparent text-gray-700;
+
+      &:hover {
+        @apply bg-gray-50;
+      }
+
+      &.selected {
+        @apply bg-gray-700 text-white;
+      }
+    }
+  }
+
+  &.btn-primary {
+    @apply bg-blue-300 border-blue-300 text-white;
+
+    &:hover {
+      @apply bg-blue-400;
+    }
+
+    &:disabled,
+    &.disabled {
+      @apply bg-blue-50 text-blue-100 border-blue-50;
+    }
+
+    &.btn-outline {
+      @apply text-blue-300 bg-transparent;
+
+      &:hover {
+        @apply bg-blue-50;
+      }
+    }
+  }
+
+  &.btn-primary-dark {
+    @apply bg-blue-800 border-blue-800 text-white;
+
+    &:hover {
+      @apply bg-blue-900;
+    }
+
+    &:disabled,
+    &.disabled {
+      @apply bg-blue-50 text-blue-300 border-blue-50;
+    }
+
+    &.btn-outline {
+      @apply text-blue-800 bg-transparent;
+
+      &:hover {
+        @apply bg-blue-50;
+      }
+    }
+  }
+
+
+  //=======
+  // Sizes
+  //=======
+  &.btn-small {}
+
+  &.btn-large {
+    @apply text-lg px-3 py-1;
+
+    @screen md {
+      @apply text-xl py-3;
+    }
+  }
+}
+
+.single_add_to_cart_button {
+  @extend .btn;
+  @extend .btn-primary;
+}
+
+.checkout-button {
+  @extend .btn;
+  @extend .btn-primary;
+}
+
+a.button {
+  background-image: none;
+}

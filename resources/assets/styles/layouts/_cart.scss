@@ -1,0 +1,60 @@
+.woocommerce-cart-form {
+  table.cart {
+    @apply w-full;
+
+    td {
+      @apply px-2 py-4;
+
+      &:first-child {
+        @apply pl-0;
+      }
+
+      &:last-child {
+        @apply pr-0;
+      }
+    }
+  }
+
+  td.product-remove>a {
+    @apply text-red-600 text-4xl px-4;
+    background-image: none;
+  }
+
+  td.product-thumbnail {
+    &>a {
+      @apply block;
+      background-image: none;
+    }
+
+    img {
+      @apply w-24;
+    }
+  }
+
+  td.product-subtotal {
+    @apply text-right;
+  }
+
+  td.actions {
+    @apply text-right;
+  }
+
+  input {
+    @apply border-solid border border-gray-100 px-2 py-1 w-full;
+    max-width: 12rem;
+  }
+}
+
+.cart-collaterals {
+  .wc-proceed-to-checkout {
+    @apply py-4 flex justify-end;
+
+    .checkout-button {
+      @apply px-8 py-4 text-xl flex items-center;
+
+      svg {
+        @apply text-3xl ml-3;
+      }
+    }
+  }
+}

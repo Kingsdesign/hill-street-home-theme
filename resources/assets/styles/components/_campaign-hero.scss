@@ -1,0 +1,39 @@
+.campaign-hero {
+  .campaign-hero_inner-wrap {
+    .ar-holder {
+      padding-bottom: 100%;
+
+      @screen lg {
+        padding-bottom: 45%;
+      }
+
+      @media (min-width: 1600px) {
+        padding-bottom: 0;
+        height: 600px;
+      }
+    }
+  }
+
+  .campaign-hero_heading-wrap {
+    .campaign-hero_heading {
+      background: rgba(51, 51, 51, 0.7);
+
+      @screen md {
+        //@apply grid;
+        //grid-template-columns: calc(theme("screens.md")/2);
+        padding-left: calc(50% - theme("screens.md") / 2)
+      }
+
+      @screen lg {
+        //grid-template-columns: calc(theme("screens.lg")/2);
+        padding-left: calc(50% - theme("screens.lg") / 2)
+      }
+
+      @screen xl {
+        //grid-template-columns: calc(theme("screens.xl")/2);
+        padding-left: calc(50% - theme("screens.xl") / 2)
+      }
+    }
+
+  }
+}

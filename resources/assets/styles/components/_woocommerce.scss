@@ -1,0 +1,34 @@
+//General wc stuff that doesn't have another home
+
+.woocommerce-notices-wrapper {
+  @extend .container;
+  //@apply py-4;
+
+  &>* {
+    @apply mt-4;
+
+    &:last-child {
+      @apply mb-4;
+    }
+  }
+
+  .woocommerce-message {
+
+    @apply bg-blue-50 px-4 py-2 flex items-center justify-between;
+
+    .button {
+      @apply order-last;
+    }
+  }
+}
+
+.woocommerce-pagination {
+  .page-numbers {
+    @apply flex items-center justify-center;
+
+    li {
+      @apply mx-2;
+    }
+  }
+
+}

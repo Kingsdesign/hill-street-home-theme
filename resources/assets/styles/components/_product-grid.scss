@@ -1,0 +1,131 @@
+//Product grid layout
+.woocommerce ul.products {
+  @apply grid grid-cols-2 gap-2;
+
+  @screen md {
+    @apply gap-4;
+  }
+
+  &.columns-3 {
+    @screen md {
+      @apply grid-cols-3;
+    }
+  }
+
+  &.columns-4 {
+    @screen md {
+      @apply grid-cols-4;
+    }
+  }
+}
+
+// Product grid tiles
+.woocommerce ul.products .product>a {
+  @apply relative block overflow-hidden;
+  padding-bottom: 100%;
+  background-image: none;
+  transition: 0.2s box-shadow ease-in-out 120ms;
+
+  &:after {
+    content: "";
+    @apply absolute left-0 top-0 w-full h-full bg-blue-100 opacity-0;
+    transition: 0.2s opacity ease-in-out 120ms;
+  }
+
+  img {
+    @apply absolute w-full h-full;
+    left: 50%;
+    top: 50%;
+    //transform: translate3d(-50%, -50%, 0) scale(1.0, 1.0);
+    transform: translate3d(-50%, -50%, 0);
+    transition: 0.2s transform ease-in-out 120ms;
+  }
+
+  h2 {
+    @apply absolute text-xl; // border-b-4 border-solid text-xl border-blue-100;
+    max-width: 75%;
+    //border-color: rgba(#6782AD, 0.5); // blue.300
+    left: 1rem;
+    top: 1rem;
+    transition: 0.2s border ease-in-out 120ms;
+  }
+
+  &:hover {
+    box-shadow: 0 0 0 2px #bec8da;
+
+    &:after {
+      @apply opacity-25;
+    }
+
+    // img {
+    //transform: translate3d(-50%, -50%, 0) scale(1.05, 1.05);
+    // }
+
+    //h2 {
+    //  @apply border-blue-200;
+    //}
+  }
+}
+
+// Product grid category tiles
+.woocommerce ul.products .product.product-category a {
+  h2 {
+    @apply absolute border-b-4 border-solid text-xl border-blue-100;
+  }
+
+  &:hover h2 {
+    @apply border-blue-200;
+  }
+}
+
+//Category grid
+.product-grid.category-grid {
+  @apply mb-16;
+}
+
+// Buttons
+.product-grid li.buttons {
+
+  &>span {
+    height: 49%;
+
+    &:first-child {
+      margin-bottom: 2.5%;
+    }
+
+    @screen md {
+      @apply h-auto;
+    }
+  }
+
+  a,
+  button {
+    @apply text-center px-2 w-full bg-gray-800 text-white;
+    height: 100%;
+
+    @screen md {
+      @apply pt-6 pb-8 text-3xl h-auto;
+    }
+
+    background-image: none;
+    transition: 0.2s background-color ease-in-out 120ms,
+    0.2s color ease-in-out 120ms,
+    0.2s box-shadow ease-in-out 120ms;
+    font-family: $font__heading;
+
+    &>span {
+      @apply inline-block;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+
+      @screen md {
+        border-bottom-width: 8px;
+        @apply pt-1 pb-3;
+      }
+    }
+
+    &:hover {
+      @apply bg-gray-900 text-gray-100;
+      box-shadow: 0 0 0 1px theme("colors.gray.500");
+    }
+  }
+}

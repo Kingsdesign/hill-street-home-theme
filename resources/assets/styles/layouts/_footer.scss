@@ -1,0 +1,13 @@
+.site-footer {
+  font-size: 16px;
+  @apply bg-blue-300 text-white py-16 border-solid border-gray-400;
+  border-top-width: 4px;
+
+  @screen md {
+    border-top-width: 8px;
+  }
+
+  a {
+    @extend .initial-none;
+  }
+}

@@ -1,0 +1,13 @@
+.page-header {
+  @apply bg-blue-50 text-center py-4;
+
+  h1 {
+    @apply text-2xl;
+  }
+}
+
+.content-page {
+  p {
+    @apply mb-3;
+  }
+}

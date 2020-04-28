@@ -1,0 +1,285 @@
+body.single-product .product {
+  @apply pb-8 px-2;
+
+  @screen md {
+    @apply pt-8 pb-8 px-0;
+  }
+
+  .summary {
+    &>* {
+      @apply mb-4;
+    }
+
+    .product_title {
+      @apply text-4xl mb-12;
+    }
+
+    .quantity {
+      @apply py-3 mt-8;
+
+      .qty-label {
+        @apply mr-3;
+      }
+
+      input.qty {
+        @apply border border-solid border-gray-100 px-2 py-1;
+      }
+    }
+  }
+
+  &.product-type-simple .summary {
+    .price {
+      .amount {
+        @apply text-2xl p-1 bg-blue-50;
+      }
+    }
+  }
+
+  &.product-type-variable {
+    .woocommerce-variation-price .price {
+      .amount {
+        @apply text-2xl p-1 bg-blue-50;
+      }
+    }
+
+    .single_variation_wrap {
+      @apply mt-5;
+    }
+
+    .single_variation {
+      @apply mb-8;
+    }
+
+    .woocommerce-variation-price {
+      @apply mb-6;
+    }
+  }
+}
+
+// The third grid template size is just in case any plugins chuck stuff in our wrapper
+.product-wrap {
+  .woocommerce-product-gallery {
+    @apply mb-8;
+
+    @screen md {
+      @apply mb-12;
+    }
+  }
+
+  .summary {
+    .product_title {
+      @apply hidden;
+    }
+  }
+
+  @screen md {
+    @apply grid gap-4;
+    grid-template-columns: calc(50% - 1rem) calc(theme("screens.md") / 2) theme("screens.md");
+
+
+    .summary {
+
+      .product_title {
+        @apply block;
+      }
+    }
+  }
+
+  @screen lg {
+    @apply gap-8;
+    grid-template-columns: calc(50% - 1rem) calc(theme("screens.lg") / 2) theme("screens.lg");
+  }
+
+  @screen xl {
+    grid-template-columns: calc(50% - 1rem) calc(theme("screens.xl") / 2) theme("screens.xl");
+  }
+}
+
+.woocommerce-product-gallery__wrapper {
+  .woocommerce-product-gallery__slide {
+    display: none;
+
+    &:nth-child(1) {
+      display: block;
+    }
+
+    img {
+      width: 100%;
+    }
+
+    &.glide__slide {
+      display: block;
+    }
+  }
+}
+
+// Variation attributes
+.variations_form {
+  .variations {
+    @apply w-full;
+
+    tr,
+    td {
+      @apply block;
+    }
+
+    tr {
+      @apply mb-3;
+    }
+
+    .label {
+      @apply italic mb-2;
+    }
+
+    .value {
+      button.rtwpvs-term {
+        @apply bg-gray-100 text-gray-600 px-3 py-3;
+
+        min-width: 3rem;
+
+        &:hover {
+          @apply bg-blue-100 text-blue-600;
+        }
+
+        &.selected {
+          @apply bg-blue-300 text-white;
+        }
+
+        &.disabled,
+        &[disabled],
+        &.disabled.selected {
+          @apply bg-gray-50 text-gray-400 pointer-events-none cursor-not-allowed relative overflow-hidden;
+
+          &:before,
+          &:after {
+            position: absolute;
+            content: " " !important;
+            width: 200%;
+            height: 1px;
+            @apply bg-red-300;
+            left: -50%;
+            right: 0;
+            bottom: 0;
+            top: 50%;
+            visibility: visible;
+            opacity: 1;
+            border: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            min-width: auto;
+            transform-origin: center;
+            z-index: 0;
+          }
+
+          &:before {
+            transform: rotate(45deg);
+          }
+
+          &:after {
+            transform: rotate(-45deg);
+          }
+        }
+      }
+    }
+  }
+}
+
+.button.single_add_to_cart_button {
+  @apply block w-full text-xl py-3 px-4 mt-2 mb-3;
+}
+
+
+//Addons
+//form-row form-row-wide wc-pao-addon-wrap wc-pao-addon-348-add-0
+
+.wc-pao-addon-name {
+  @apply italic mb-3 block;
+}
+
+.wc-pao-addon-wrap {
+  a {
+    background-image: none;
+  }
+
+  @apply grid grid-cols-3;
+
+  @screen md {
+    grid-template-columns: repeat(auto-fit, minmax(8.3rem, 1fr));
+  }
+
+  .wc-pao-addon-image-swatch {
+    @apply bg-gray-100 relative p-2;
+
+    @screen md {
+      @apply p-4;
+    }
+
+    transition: 0.2s background-color ease-in-out 120ms;
+
+    &:hover {
+      @apply bg-blue-100;
+    }
+
+    &.selected {
+      @apply bg-blue-300;
+    }
+
+    img {
+      @apply w-full h-auto;
+    }
+  }
+
+  .wc-pao-addon-image-swatch-select {
+    @apply hidden;
+  }
+}
+
+//breathe
+.wc-pao-addon-container {
+  @apply mb-6;
+}
+
+//Hide addon totals except subtotal
+.product-addon-totals {
+  li:not(.wc-pao-subtotal-line) {
+    @apply hidden;
+  }
+
+  .wc-pao-subtotal-line {
+    @apply text-right text-sm;
+
+    @screen md {
+      @apply text-base;
+    }
+
+    strong {
+      @apply font-normal;
+    }
+
+    .amount {
+      @apply text-2xl;
+    }
+  }
+}
+
+//After summary
+.after-summary-wrap {
+  &>* {
+    @apply mb-12;
+  }
+}
+
+.product-description {
+  h2 {
+    @apply text-2xl;
+  }
+}
+
+
+.related.products {
+  @apply mt-20;
+
+  &>h2 {
+    @apply text-2xl;
+  }
+}

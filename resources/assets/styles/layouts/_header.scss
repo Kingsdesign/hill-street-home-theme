@@ -1,0 +1,76 @@
+.site-header {
+  a {
+    @extend .initial-none;
+  }
+
+  .brand {
+    background-image: none;
+  }
+
+
+  @apply border-b-4 border-solid border-blue-100;
+
+  @screen md {
+    border-bottom-width: 8px;
+  }
+}
+
+.header_top-bar {
+  @apply text-sm;
+}
+
+.current-store_display {
+  border-bottom-color: transparent;
+  border-top-color: #000;
+  padding-top: 0.125rem;
+}
+
+.primary-nav-toggle {
+  @apply text-4xl;
+}
+
+.nav-primary {
+  @screen sm-max {
+    z-index: 999;
+    @apply fixed left-0 top-0 w-full h-full bg-gray-100 hidden;
+  }
+
+  &.active {
+    @screen sm-max {
+
+      @apply block;
+    }
+  }
+
+  @screen md {
+    @apply flex -mx-2 items-center py-3;
+
+    .nav {
+      @apply flex items-center justify-center;
+
+      &>li {
+        @apply px-2;
+
+        @screen xl {
+          @apply px-3;
+        }
+      }
+    }
+  }
+
+  .nav-primary-inner {
+
+    button,
+    a {
+      @apply block w-full py-1 mb-2;
+    }
+
+    @screen md {
+
+      button,
+      a {
+        @apply inline-block w-auto py-0 mb-0;
+      }
+    }
+  }
+}

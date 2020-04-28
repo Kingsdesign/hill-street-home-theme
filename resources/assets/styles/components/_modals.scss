@@ -1,0 +1,71 @@
+.modal {
+  @apply fixed hidden left-0 top-0 w-full h-full;
+
+  .modal-overlay {
+    //@apply absolute left-0 top-0 w-full h-full;
+    //background: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.modal.is-open {
+  display: block;
+}
+
+#modal-search {
+  @apply bg-gray-100;
+
+  .modal-container {
+    @apply w-full h-full flex items-center justify-center relative;
+  }
+
+  .modal-content {
+    @apply w-full max-w-2xl;
+  }
+}
+
+//====
+// Store chooser
+//====
+#modal-store-chooser {
+  .modal-container {
+    @apply w-full h-full flex items-center justify-center relative px-2;
+  }
+
+  .modal-backdrop {
+    @apply absolute left-0 top-0 w-full h-full;
+    background: rgba(255, 255, 255, 0.6);
+  }
+
+  .modal-content {
+    @apply relative bg-white border-solid border-4 border-gray-300 w-full max-w-xl overflow-y-scroll;
+    max-height: 100%;
+  }
+
+  .sc-method-button {
+    .icon {
+      @apply ml-3;
+    }
+  }
+
+  #autoComplete_list {
+    @apply absolute left-0 w-full bg-white hidden;
+    top: 100%;
+
+    &>button,
+    &>span {
+      @apply px-3 py-2 border-solid border-gray-800 block w-full text-left text-gray-700 text-sm;
+      border-left-width: 1px;
+      border-right-width: 1px;
+
+      &:last-child {
+        border-bottom-width: 1px;
+      }
+    }
+
+    &>button {
+      &:hover {
+        @apply bg-gray-50;
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+//For landscape images
+.ar-holder {
+  @apply relative overflow-hidden;
+
+  &>* {
+    @apply absolute;
+  }
+
+  @mixin landscape() {
+    &>* {
+      @apply absolute w-full h-auto left-0;
+      top: 50%;
+      transform: translate3d(0, -50%, 0);
+    }
+  }
+
+  @mixin portrait() {
+    &>* {
+      @apply absolute h-full w-auto top-0;
+      max-width: none;
+      left: 50%;
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+
+  //use if media is landscape
+  &.landscape {
+    @include landscape();
+  }
+
+  //use if media is square or portrait
+  &.portrait {
+    @include portrait();
+  }
+
+  @screen sm {
+    &.sm\:landscape {
+      @include landscape();
+    }
+
+    &.sm\:portrait {
+      @include portrait();
+    }
+  }
+
+  @screen md {
+    &.md\:landscape {
+      @include landscape();
+    }
+
+    &.md\:portrait {
+      @include portrait();
+    }
+  }
+
+  @screen lg {
+    &.lg\:landscape {
+      @include landscape();
+    }
+
+    &.lg\:portrait {
+      @include portrait();
+    }
+  }
+
+  @screen xl {
+    &.xl\:landscape {
+      @include landscape();
+    }
+
+    &.xl\:portrait {
+      @include portrait();
+    }
+  }
+}

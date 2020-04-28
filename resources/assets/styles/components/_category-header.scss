@@ -1,0 +1,26 @@
+.category-header {
+  @apply grid text-white py-4;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.7);
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+
+  @screen lg {
+    grid-template-columns: 25% 50%;
+  }
+
+  .woocommerce-breadcrumb {
+    @apply text-sm;
+
+    a {
+      //@extend .initial-none;
+    }
+  }
+
+  .woocommerce-products-header {
+    @apply text-center;
+
+    h1 {
+      @apply text-3xl;
+    }
+  }
+}

@@ -1,0 +1,6 @@
+@tailwind utilities;
+
+
+.sc-data-display {
+  @apply border border-solid border-gray-300 p-4 text-xl text-center bg-gray-50 mb-6;
+}
