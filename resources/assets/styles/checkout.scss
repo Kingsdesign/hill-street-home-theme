@@ -1,6 +1,92 @@
 @tailwind utilities;
 
+@import "components/buttons";
+
 
 .sc-data-display {
   @apply border border-solid border-gray-300 p-4 text-xl text-center bg-gray-50 mb-6;
 }
+
+.alg_wc_shipping_description {
+  @apply text-sm block mt-2 text-gray-600;
+}
+
+.wc-credit-card-form-card-name {
+  font-size: 16px;
+  @apply px-3 py-3 rounded border border-gray-200 border-solid;
+}
+
+/*#eway_credit_card_form {
+
+  .woocommerce-invalid {
+    input.input-text {
+      @apply border-red-600 border border-solid;
+    }
+  }
+
+  .woocommerce-valid {
+    input.input-text {
+      @apply border-green-600 border border-solid;
+    }
+  }
+
+  label[for="EWAY_TEMPCARDNUMBER"],
+  label[for="EWAY_EXPIRY"],
+  label[for="EWAY_CARDCVN"] {
+    @apply block w-full mb-3;
+  }
+
+
+  .input-text.wc-credit-card-form-card-number,
+  .input-text.wc-credit-card-form-card-expiry,
+  .input-text.wc-credit-card-form-card-cvc {
+    @apply block w-full rounded border border-solid border-gray-300;
+  }
+
+  .input-text.wc-credit-card-form-card-expiry,
+  .input-text.wc-credit-card-form-card-cvc {
+    @apply py-2 px-2;
+  }
+
+  /*.form-row {
+    @apply px-2;
+  }
+
+  .form-row.form-row-first {
+    @apply float-left w-1/2;
+  }
+
+  .form-row.form-row-last {
+    @apply float-right w-1/2;
+  }
+
+  .form-row.form-row-wide {
+    &:after {
+      content: "";
+      clear: both;
+      float: none;
+    }
+  }*/
+
+/* &>div {
+    @apply grid grid-cols-2 gap-4;
+
+    .form-row-wide {
+      @apply col-span-2;
+    }
+  }
+
+  .submit.button {
+    @extend .btn;
+    @extend .btn-large;
+    @extend .btn-primary;
+    @apply block mt-6 cursor-pointer;
+
+    &:after {
+      content: "";
+      clear: both;
+      float: none;
+    }
+  }
+}
+*/

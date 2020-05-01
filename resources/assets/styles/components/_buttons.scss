@@ -1,6 +1,6 @@
 .btn,
 .button {
-  @apply bg-gray-300 border border-solid border-transparent text-black px-3 py-1;
+  @apply bg-gray-300 border border-solid border-transparent text-black px-3 py-1 cursor-pointer;
 
   &.btn-sm {
     @apply text-sm px-2;

@@ -11,6 +11,8 @@ import singleProduct from "./singleProduct";
 
 import { addEventListener } from "../util/dom-help";
 
+import { trigger } from "../util/dom-help";
+
 //import modalConfig from "../util/modalConfig";
 import ModalService from "../services/modalService";
 
@@ -73,6 +75,8 @@ export default {
         //replaceAssets(nextHtml);
       }
 
+      trigger("store-chooser::maybe_show", document);
+
       observer.observe();
       var routes = new Router({
         home,
@@ -128,19 +132,36 @@ export default {
   },
 };
 
-function diffAssets(currentAssets, newAssets, matchFn) {
+function diffAssets(
+  currentAssets,
+  newAssets,
+  matchFn,
+  { unchanged = false } = {}
+) {
   let removedAssets = currentAssets.filter((x) => notIncludes(x, newAssets));
   let addedAssets = newAssets.filter((x) => notIncludes(x, currentAssets));
 
-  function notIncludes(asset, arr) {
-    let includes = false;
-    for (let i = 0; i < arr.length && !includes; i++) {
-      if (matchFn(asset, arr[i])) includes = true;
+  let unchangedAssets = unchanged
+    ? newAssets.filter((x) => includes(x, currentAssets))
+    : null;
+
+  function includes(asset, arr) {
+    let _includes = false;
+    for (let i = 0; i < arr.length && !_includes; i++) {
+      if (matchFn(asset, arr[i])) _includes = true;
     }
-    return !includes;
+    return includes;
   }
 
-  return { added: addedAssets, removed: removedAssets };
+  function notIncludes(asset, arr) {
+    return !includes(asset, arr);
+  }
+
+  return {
+    added: addedAssets,
+    removed: removedAssets,
+    unchanged: unchangedAssets,
+  };
 }
 
 function getAssetsFromDOM(context) {
@@ -184,9 +205,9 @@ function replaceAssets(html) {
   );
 
   //Add & removed linked styles
-  /*stylesDiff.removed.forEach((asset) => {
+  stylesDiff.removed.forEach((asset) => {
     asset.remove();
-  });*/
+  });
   stylesDiff.added.forEach((asset) => {
     const s = document.createElement("link");
     s.rel = "stylesheet";
@@ -197,10 +218,10 @@ function replaceAssets(html) {
   });
 
   //Add & remove inline styles
-  //TODO this is dev only
-  /*inlineStylesDiff.removed.forEach((asset) => {
+  ////TODO this is dev only
+  inlineStylesDiff.removed.forEach((asset) => {
     asset.remove();
-  });*/
+  });
   inlineStylesDiff.added.forEach((asset) => {
     const s = document.createElement("style");
     if (asset.type) s.type = asset.type;
@@ -210,6 +231,40 @@ function replaceAssets(html) {
     head.appendChild(s);
   });
 
+  const alwaysReloadScripts = [
+    //"/plugins/woocommerce/assets/js/frontend/single-product.js",
+    //"/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
+    //"/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.js",
+    //"/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
+    //"/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
+    //"/plugins/woocommerce/assets/js/frontend/add-to-cart-variation.js",
+
+    //
+    "/themes/hillsthome/jquery-3.5.0.min.js",
+    "/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.js",
+    "/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
+    "/plugins/woocommerce/assets/js/frontend/single-product.js",
+    //"/plugins/woocommerce/assets/js/js-cookie/js.cookie.js",
+    "/plugins/woocommerce/assets/js/frontend/woocommerce.js",
+    //"/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
+    //"/plugins/woocommerce/assets/js/jquery-tiptip/jquery.tipTip.min.js",
+    "/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
+    "/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
+    //"/wp-includes/js/underscore.min.js",
+    //"/wp-includes/js/wp-util.js",
+    "/wp-content/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
+    //"/wp-content/themes/hillsthome/dist/scripts/main.js",
+    //"/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
+    //"/wp-content/plugins/woocommerce/assets/js/accounting/accounting.js",
+    "/wp-content/plugins/woocommerce-product-addons/assets/js/addons.js",
+  ];
+
+  const assetInList = (src, array) => {
+    return (
+      array.findIndex((item) => src.substr(item.length * -1) === item) !== -1
+    );
+  };
+
   //-----
   // Scripts
   const scriptsDiff = diffAssets(
@@ -217,7 +272,8 @@ function replaceAssets(html) {
     Array.from(newAssets.scripts.linked),
     (a, b) => {
       return a.src === b.src;
-    }
+    },
+    { unchanged: true }
   );
   const inlineScriptsDiff = diffAssets(
     Array.from(currentAssets.scripts.inline),
@@ -226,19 +282,6 @@ function replaceAssets(html) {
       return a.id && b.id && a.id === b.id;
     }
   );
-
-  //Add & removed linked scripts
-  scriptsDiff.removed.forEach((asset) => {
-    asset.remove();
-  });
-  scriptsDiff.added.forEach((asset) => {
-    const s = document.createElement("script");
-    if (asset.type) s.type = asset.type;
-    if (asset.id) s.id = asset.id;
-
-    s.src = asset.src;
-    body.appendChild(s);
-  });
 
   //Add & remove inline scripts
   inlineScriptsDiff.removed.forEach((asset) => {
@@ -252,102 +295,45 @@ function replaceAssets(html) {
     s.innerHTML = asset.innerHTML;
     body.appendChild(s);
   });
-}
 
-/*function replaceAssets(html) {
-  //Scripts & styles
-  var tempDOM = document.createElement("div");
-  tempDOM.innerHTML = html;
-
-  var newScripts = tempDOM.getElementsByTagName("script");
-  var newStyles = tempDOM.querySelectorAll('link[rel="stylesheet"]');
-  const newInlineStyles = tempDOM.getElementsByTagName("style");
-
-  const currentScripts = document.getElementsByTagName("script[src]");
-  const currentInlineScripts = document.getElementsByTagName("script:not([src]");
-  const currentStyles = document.querySelectorAll('link[rel="stylesheet"]');
-  const currentInlineStyles = document.getElementsByTagName("style");
-
-  const excludeScripts = [
-    "browser-sync/browser-sync-client.js?v=2.24.7",
-    "dist/scripts/main.js",
-    "jquery-3.5.0.min.js",
-  ];
-  const excludeStyles = ["dist/styles/main.css"];
-
-  const shouldExcludeAsset = (src, exclusionArray) => {
-    let exclude = false;
-
-    exclusionArray.forEach((name) => {
-      if (src.substr(name.length * -1, name.length) === name) {
-        exclude = true;
-        return false;
-      }
-    });
-    return exclude;
-  };
-
-  const shouldExcludeScript = (src) => {
-    return shouldExcludeAsset(src, excludeScripts);
-  };
-  const shouldExcludeStyle = (src) => {
-    return shouldExcludeAsset(src, excludeStyles);
-  };
-
-  //Remove current scripts unless excluded
-  //Will remove all inline
-  const linkedScripts =[], inlineScripts = [];
-  Array.from(currentScripts)
-  const scriptsDiff = diffAssets(Array.from(currentScripts), Array.from(newScripts), (a, b) => {
-      return a.src && b.src && a.src === b.src;
-    })
-    scriptsDiff.forEach()
-  Array.from(currentScripts).forEach((script) => {
-    if (script.src && shouldExcludeScript(script.src)) return;
-    if (script.id === "__bs_script__") return;
-    script.remove();
-  });
-  //Remove current styles unless excluded
-  Array.from(currentStyles).forEach((style) => {
-    if (style.href && shouldExcludeStyle(style.href)) return;
-    style.remove();
-  });
-  Array.from(currentInlineStyles).forEach((style) => {
-    style.remove();
+  //Add & removed linked scripts
+  scriptsDiff.removed.forEach((asset) => {
+    asset.remove();
   });
 
-  Array.from(newScripts).forEach((script) => {
-    if (script.src && shouldExcludeScript(script.src)) return;
-    if (script.id === "__bs_script__") return;
-    //if (script.src) console.log("script added: ", script.src);
-    //script.remove();
-    const s = document.createElement("script");
-    if (script.type) s.type = script.type;
-    if (script.id) s.id = script.id;
+  //Reload always reload scripts
+  scriptsDiff.unchanged.forEach((asset) => {
+    if (assetInList(asset.src, alwaysReloadScripts)) {
+      const s = document.createElement("script");
+      if (asset.type) s.type = asset.type;
+      if (asset.id) s.id = asset.id;
 
-    if (script.src) {
-      s.src = script.src;
-      document.body.appendChild(s);
-    } else {
-      s.innerHTML = script.innerHTML;
-      //document.getElementsByTagName("head")[0].appendChild(s);
-      document.body.appendChild(s);
+      s.src = asset.src;
+
+      asset.remove();
+
+      body.appendChild(s);
     }
   });
-  Array.from(newStyles).forEach((style) => {
-    if (style.href && shouldExcludeStyle(style.href)) return;
-    if (!style.href) return;
+  scriptsDiff.added.forEach((asset) => {
+    const s = document.createElement("script");
+    if (asset.type) s.type = asset.type;
+    if (asset.id) s.id = asset.id;
 
-    const s = document.createElement("link");
-    s.rel = "stylesheet";
-    s.href = style.href;
-    document.getElementsByTagName("head")[0].appendChild(s);
+    s.src = asset.src;
+    body.appendChild(s);
   });
-  Array.from(newInlineStyles).forEach((style) => {
-    const s = document.createElement("style");
-    s.innerHTML = style.innerHTML;
-    document.getElementsByTagName("head")[0].appendChild(s);
-  });
+  //Reload jquery
+  let src = "/wp-content/themes/hillsthome/jquery-3.5.0.min.js";
+  Array.from(currentAssets.scripts.linked).forEach((asset) => {
+    if (asset.src.substr(src.length * -1) === src) {
+      const s = document.createElement("script");
+      if (asset.type) s.type = asset.type;
+      if (asset.id) s.id = asset.id;
 
-  tempDOM.innerHTML = ""; //probably not necessary
-}*/
+      s.src = asset.src;
+      asset.remove();
+      body.appendChild(s);
+    }
+  });
+}

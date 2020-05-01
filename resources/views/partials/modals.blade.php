@@ -12,13 +12,13 @@
 
 
       <header>
-        <h2 id="modal-search--title">
+        <h2 id="modal-search--title" class="text-lg mb-3">
           Search
         </h2>
       </header>
 
       <div id="modal-search--content">
-        Modal Content
+        {!! get_search_form(false) !!}
       </div>
 
     </div>
@@ -68,7 +68,7 @@
             </div>
           </div>
           <div>
-            <span class="mb-6 md:mt-12 block text-center md:text-lg font-bold bg-blue-50 py-3" data-sc-if="location"
+            <span class="mb-6 md:mt-12 block text-center md:text-lg font-bold bg-blue-50 py-3" data-sc-if="%location%"
               data-sc-tpl="header_string"></span>
           </div>
           <div>

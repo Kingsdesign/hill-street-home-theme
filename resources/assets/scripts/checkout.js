@@ -1,3 +1,13 @@
+import { ucFirst } from "./util/string-helpers";
+import { ready, selectElements, addEventListener } from "./util/dom-help";
+import {
+  startOfToday,
+  add,
+  isAfter,
+  startOfTomorrow,
+  isBefore,
+} from "date-fns";
+
 const data = window.custom_checkout_data;
 const Cookies = window.Cookies;
 
@@ -11,9 +21,10 @@ const cookieData = (() => {
   }
 })();
 
-console.log("cookiedata", cookieData);
+//console.log("cookiedata", cookieData);
 
 ready(() => {
+  //Conditional label/placeholer on date
   if (cookieData.method) {
     selectElements("#cfw-customer-info #date").forEach((e) => {
       e.placeholder = e.placeholder.replace("order", cookieData.method);
@@ -23,75 +34,28 @@ ready(() => {
     });
   }
 
-  addEventListener("click", ".cfw-next-tab", function (e) {
+  /*addEventListener("click", ".cfw-next-tab", function (e) {
     //TODO validations
     console.log("click", this);
-  });
-});
+  });*/
 
-function selectElements(selector, context = document) {
-  const el = context.querySelectorAll(selector);
-  let o = {};
-  Array.from(el).forEach((e, i) => {
-    o[i] = e;
-  });
-  o.forEach = (cb) => {
-    Array.from(el).forEach(cb);
-  };
-  return o;
-}
+  //Restrict date picker options
+  const datePicker = document.querySelector("#date.checkout-date-picker");
+  if (datePicker) {
+    //datePicker.datepicker('option','minDate')
+    const cutoffTime = add(startOfToday(), { hours: 11 }); //11am today
+    const isAfterCutoff = isAfter(new Date(), cutoffTime);
 
-/**
- * these 2 shold really be in a util file
- * @param {} str
- */
-function ucFirst(str) {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
-}
-
-function ucWords(str) {
-  if (!str) return "";
-  return str
-    .split(" ")
-    .map((p) => ucFirst(p))
-    .join(" ");
-}
-
-/**
- * take a location slug (e.g. west-hobart)
- * and convert it to a display name
- * @param {} slug
- */
-function locationToDisplay(slug) {
-  const parts = slug.split(/[-_]/g);
-  return parts.map((p) => ucFirst(p)).join(" ");
-}
-
-function ready(fn) {
-  if (document.readyState != "loading") {
-    fn();
-  } else {
-    document.addEventListener("DOMContentLoaded", fn);
+    let minDate = startOfToday();
+    if (isAfterCutoff) {
+      minDate = startOfTomorrow();
+    }
+    $(datePicker).datepicker("option", "minDate", minDate);
+    //$(datePicker).datepicker("option", "defaultDate", 1);
+    /*$(datePicker).datepicker("option", "beforeShowDay", (date) => {
+      if (isBefore(date, minDate)) return [false];
+      return [true];
+    });*/
   }
-}
-
-function addEventListener(eventName, elementSelector, handler) {
-  document.addEventListener(
-    eventName,
-    function (e) {
-      // loop parent nodes from the target to the delegation node
-      for (
-        var target = e.target;
-        target && target != this;
-        target = target.parentNode
-      ) {
-        if (target.matches(elementSelector)) {
-          handler.call(target, e);
-          break;
-        }
-      }
-    },
-    false
-  );
-}
+  //$("#date.date-picker").datepicker("option", "minDate", new Date(2007, 1 - 1, 1));
+});

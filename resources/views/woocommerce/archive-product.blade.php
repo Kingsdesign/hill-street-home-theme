@@ -38,11 +38,11 @@ do_action('woocommerce_before_main_content');
 
 </div>
 
-<div class="px-2 max-w-lg mx-auto">
-  @php
-  do_action('woocommerce_archive_description');
-  @endphp
-</div>
+
+@php
+do_action('woocommerce_archive_description');
+@endphp
+
 
 
 <div class="container py-8 md:py-20">

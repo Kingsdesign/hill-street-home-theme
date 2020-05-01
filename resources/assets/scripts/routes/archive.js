@@ -13,5 +13,20 @@ export default {
   },
   finalize() {
     // JavaScript to be fired on the home page, after the init JS
+
+    /**
+     * trigger submit on category sort change
+     */
+    Array.from(document.querySelectorAll("form.woocommerce-ordering")).forEach(
+      (form) => {
+        Array.from(form.querySelectorAll("select.orderby")).forEach(
+          (select) => {
+            select.addEventListener("change", (e) => {
+              form.submit();
+            });
+          }
+        );
+      }
+    );
   },
 };

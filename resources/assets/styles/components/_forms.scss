@@ -1,22 +1,19 @@
 /** Search form */
 .search-form {
-  @apply flex items-center;
-}
 
-.search-form label {
-  @apply mb-4;
+  @apply w-full max-w-xl mx-auto flex flex-wrap;
 
-  font-weight: normal;
-}
-
-.search-form .search-field {
-  @apply block appearance-none w-full py-1 px-2 mb-1 text-base leading-normal bg-white text-gray-600 border border-gray-600 rounded;
-}
-
-.search-form .search-submit {
-  @apply inline-block align-middle text-center select-none border font-normal whitespace-no-wrap py-2 px-4 rounded text-base leading-normal no-underline text-gray-100 bg-gray-500;
-
-  &:hover {
-    @apply bg-gray-300;
+  &>label {
+    @apply block;
+    flex-grow: 1;
   }
+
+  .search-field {
+    @apply block w-full border border-solid border-gray-600 px-3 py-2 text-lg;
+  }
+
+  .search-submit {
+    @extend .btn;
+  }
+
 }

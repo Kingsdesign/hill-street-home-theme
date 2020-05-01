@@ -32,6 +32,14 @@ body.single-product .product {
       .amount {
         @apply text-2xl p-1 bg-blue-50;
       }
+
+      del .amount {
+        @apply bg-transparent;
+      }
+
+      ins {
+        @apply no-underline;
+      }
     }
   }
 
@@ -39,6 +47,14 @@ body.single-product .product {
     .woocommerce-variation-price .price {
       .amount {
         @apply text-2xl p-1 bg-blue-50;
+      }
+
+      del .amount {
+        @apply bg-transparent;
+      }
+
+      ins {
+        @apply no-underline;
       }
     }
 
@@ -58,6 +74,17 @@ body.single-product .product {
 
 // The third grid template size is just in case any plugins chuck stuff in our wrapper
 .product-wrap {
+
+  @apply relative;
+
+  .onsale {
+    @apply absolute z-10 top-0 bg-orange-300 rounded px-2 py-1 text-lg right-0;
+
+    @screen md {
+      right: calc(50% + 1rem);
+    }
+  }
+
   .woocommerce-product-gallery {
     @apply mb-8;
 
@@ -204,7 +231,8 @@ body.single-product .product {
   @apply grid grid-cols-3;
 
   @screen md {
-    grid-template-columns: repeat(auto-fit, minmax(8.3rem, 1fr));
+    //grid-template-columns: repeat(auto-fit, minmax(8.3rem, 1fr));
+    @apply grid-cols-4;
   }
 
   .wc-pao-addon-image-swatch {

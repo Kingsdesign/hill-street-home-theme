@@ -1,5 +1,6 @@
 .modal {
   @apply fixed hidden left-0 top-0 w-full h-full;
+  z-index: 999;
 
   .modal-overlay {
     //@apply absolute left-0 top-0 w-full h-full;
@@ -15,11 +16,19 @@
   @apply bg-gray-100;
 
   .modal-container {
-    @apply w-full h-full flex items-center justify-center relative;
+    @apply w-full h-full flex justify-center relative pt-20;
   }
 
   .modal-content {
     @apply w-full max-w-2xl;
+  }
+
+  .search-form {
+    @apply max-w-none w-full;
+
+    .search-field {
+      @apply px-3 py-3 text-xl;
+    }
   }
 }
 

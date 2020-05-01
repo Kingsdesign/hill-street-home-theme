@@ -3,8 +3,11 @@
 //import MicroModal from "micromodal";
 import autoComplete from "@tarekraafat/autocomplete.js";
 import fetch from "unfetch";
-import modalConfig from "./util/modalConfig";
+//import modalConfig from "./util/modalConfig";
 import ModalService from "./services/modalService";
+import { ucWords, ucFirst, deslugify } from "./util/string-helpers";
+import { ready, addEventListener } from "./util/dom-help";
+import barba from "@barba/core";
 
 const Cookies = window.Cookies;
 const data = window.store_chooser_data;
@@ -38,13 +41,13 @@ if (cookieData) {
   if (cookieData.location) location = cookieData.location;
 }
 
+let initialRender = false;
 ready(() => {
-  if (!method || !postcode || !suburb || !location) {
-    showModal();
-  }
+  maybeShowModal();
 
   //Bind data
-  renderDomData();
+  barba.hooks.afterEnter(renderDomData());
+  if (!initialRender) renderDomData();
 
   //Event listeners
   bindEvents();
@@ -52,24 +55,12 @@ ready(() => {
 
 function bindEvents() {
   addEventListener("click", "[data-sc-show]", showModal);
-}
-
-function ucFirst(str) {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
-}
-
-/**
- * take a location slug (e.g. west-hobart)
- * and convert it to a display name
- * @param {} slug
- */
-function locationToDisplay(slug) {
-  const parts = slug.split(/[-_]/g);
-  return parts.map((p) => ucFirst(p)).join(" ");
+  document.addEventListener("store-chooser::show", showModal);
+  document.addEventListener("store-chooser::maybe_show", maybeShowModal);
 }
 
 function renderDomData() {
+  initialRender = true;
   //Generic data binding
   const _d = {
     method,
@@ -78,8 +69,8 @@ function renderDomData() {
     location,
     method_display: ucFirst(method),
     postcode_display: postcode,
-    suburb_display: ucFirst(suburb),
-    location_display: locationToDisplay(location),
+    suburb_display: ucWords(suburb),
+    location_display: ucWords(deslugify(location)),
   };
   Array.from(document.querySelectorAll("[data-sc-val]")).forEach((el) => {
     if (el.tagName === "input") {
@@ -89,14 +80,50 @@ function renderDomData() {
     }
   });
 
+  function parseConditional(obj, context = {}) {
+    return Function('"use strict";var _ctx=arguments[0]; return (' + obj + ")")(
+      context
+    );
+  }
+
   //Conditional render
   Array.from(document.querySelectorAll("[data-sc-if]")).forEach((el) => {
-    const key = el.dataset["scIf"];
-    //console.log("testing if", key, _d[key]);
-    if (!_d[key]) {
+    let condition = el.dataset["scIf"];
+    //if (condition.length > 50) return;
+    //Replace variables from our data
+    const reg = /%([a-z0-9-_]+)%/g;
+    let result;
+    while ((result = reg.exec(condition))) {
+      if (typeof _d[result[1]] !== `undefined`) {
+        condition =
+          condition.substr(0, result.index) +
+          `_ctx['${result[1]}']` +
+          condition.substr(result.index + result[0].length);
+      }
+    }
+
+    let conditionResult = false;
+    try {
+      conditionResult = !!parseConditional(condition, _d);
+    } catch (e) {
+      conditionResult = false;
+    }
+    if (!conditionResult) {
       el.style.display = "none";
     } else {
       el.style.display = "";
+    }
+
+    if (
+      el.nextElementSibling &&
+      el.nextElementSibling.dataset &&
+      typeof el.nextElementSibling.dataset[`scElse`] !== "undefined"
+    ) {
+      if (conditionResult) {
+        el.nextElementSibling.style.display = "none";
+      } else {
+        el.nextElementSibling.style.display = "";
+      }
     }
   });
 
@@ -113,6 +140,12 @@ function renderDomData() {
       (method === "pickup" ? _d.location_display : _d.suburb_display);
     el.innerHTML = str;
   });
+}
+
+function maybeShowModal() {
+  if (!method || !postcode || !suburb || !location) {
+    showModal();
+  }
 }
 
 /**
@@ -309,7 +342,7 @@ function onShowModal(modal) {
     selector: "#autoComplete", // Input field selector              | (Optional)
     threshold: 2, // Min. Chars length to start Engine | (Optional)
     //searchEngine: "strict", // Search Engine type/mode           | (Optional)
-    //maxResults: 5, // Max. number of rendered results | (Optional)
+    maxResults: 10, // Max. number of rendered results | (Optional)
     //highlight: true, // Highlight matching results      | (Optional)
     noResults: () => {
       const result = document.createElement("span");
@@ -373,32 +406,4 @@ function onShowModal(modal) {
         }
       });
   });
-}
-
-function ready(fn) {
-  if (document.readyState != "loading") {
-    fn();
-  } else {
-    document.addEventListener("DOMContentLoaded", fn);
-  }
-}
-
-function addEventListener(eventName, elementSelector, handler) {
-  document.addEventListener(
-    eventName,
-    function (e) {
-      // loop parent nodes from the target to the delegation node
-      for (
-        var target = e.target;
-        target && target != this;
-        target = target.parentNode
-      ) {
-        if (target.matches(elementSelector)) {
-          handler.call(target, e);
-          break;
-        }
-      }
-    },
-    false
-  );
 }

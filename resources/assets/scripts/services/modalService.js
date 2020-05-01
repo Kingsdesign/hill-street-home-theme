@@ -7,7 +7,7 @@ function ModalService() {
     onShow: [],
   };
   //
-  console.log("modal service started");
+  //console.log("modal service started");
   MicroModal.init(modalConfig);
 
   //Bind events

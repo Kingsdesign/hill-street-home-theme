@@ -32,6 +32,8 @@ class FrontPage extends Controller {
    */
   public static function product_categories($ids, $atts) {
 
+    $hide_empty = true;
+
     $atts = shortcode_atts(
       array(
         'limit' => '-1',
@@ -69,7 +71,7 @@ class FrontPage extends Controller {
     }
 
     usort($product_categories, function ($a, $b) use ($ids) {
-      if ($a->term_id === $b->$term_id) {
+      if ($a->term_id === $b->term_id) {
         return 0;
       }
 
@@ -99,7 +101,7 @@ class FrontPage extends Controller {
       }
 
       //Inject our buttons
-      $shop_page_url = App::relative_url(get_permalink(woocommerce_get_page_id('shop')));
+      $shop_page_url = App::relative_url(get_permalink(wc_get_page_id('shop')));
       echo '<li class="product-category product buttons md:col-span-3 md:grid md:grid-cols-2 md:gap-4 md:pt-6">';
       echo '<span class="block"><a class="flex items-center justify-center" href="' . esc_url($shop_page_url) . '"><span>Shop all</span></a></span>';
       echo '<span class="block"><button class="flex items-center justify-center" data-modal-trigger="modal-search"><span>Search</span></button></span>';

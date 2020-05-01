@@ -2,6 +2,22 @@
   table.cart {
     @apply w-full;
 
+    thead th {
+      @apply py-2;
+    }
+
+    tbody tr {
+      @apply border-b border-solid border-gray-600;
+
+      &:first-child {
+        @apply border-t;
+      }
+
+      &:last-child {
+        @apply border-none;
+      }
+    }
+
     td {
       @apply px-2 py-4;
 
@@ -16,7 +32,7 @@
   }
 
   td.product-remove>a {
-    @apply text-red-600 text-4xl px-4;
+    @apply text-red-600 text-4xl;
     background-image: none;
   }
 
@@ -28,6 +44,30 @@
 
     img {
       @apply w-24;
+    }
+  }
+
+  td.product-name {
+    a {
+      @apply text-lg;
+    }
+
+    .variation {
+      @apply mt-3;
+
+      dt {
+        @apply italic text-sm underline;
+      }
+
+      dt,
+      dd,
+      dd>p {
+        @apply inline;
+      }
+
+      dd {
+        @apply pr-2;
+      }
     }
   }
 
@@ -43,11 +83,100 @@
     @apply border-solid border border-gray-100 px-2 py-1 w-full;
     max-width: 12rem;
   }
+
+  @screen sm {
+    td.product-remove>a {
+      @apply px-4;
+    }
+
+    td.product-quantity {
+      max-width: 7rem;
+    }
+  }
+
+  @screen xs-max {
+    tr {
+      @apply grid;
+    }
+
+    td,
+    th {
+      @apply block;
+    }
+
+    thead {
+      @apply hidden;
+    }
+
+    tbody {
+      tr {
+        grid-template-columns: 5rem auto auto 2rem;
+
+        td {
+          @apply p-0;
+
+          &.product-remove {
+            @apply col-start-4;
+          }
+
+          &.product-thumbnail {
+            @apply row-span-2 row-start-1 col-start-1;
+          }
+
+          &.product-name {
+            @apply col-span-2 col-start-2 row-start-1;
+          }
+
+          &.product-price {
+            @apply col-span-2 col-start-3;
+          }
+
+          &.product-quantity {
+            @apply col-start-2 row-start-2;
+          }
+
+          &.product-subtotal {
+            @apply hidden;
+          }
+
+          &[colspan] {
+            @apply col-span-4;
+          }
+        }
+      }
+    }
+  }
+}
+
+.cart_totals {
+  @apply text-right mt-6;
+
+  h2 {
+    @apply text-2xl;
+  }
+
+  .shop_table {
+    @apply w-full max-w-lg ml-auto my-4;
+
+    tbody {
+      tr {
+        @apply border-b border-solid border-gray-600;
+
+        td {
+          @apply py-2;
+        }
+      }
+    }
+  }
 }
 
 .cart-collaterals {
   .wc-proceed-to-checkout {
-    @apply py-4 flex justify-end;
+    @apply py-4 flex justify-between items-center flex-wrap;
+
+    &>* {
+      @apply my-3;
+    }
 
     .checkout-button {
       @apply px-8 py-4 text-xl flex items-center;
@@ -57,4 +186,10 @@
       }
     }
   }
+}
+
+
+/* lazy! hide the shipping method description here*/
+body.cart .cart_totals .alg_wc_shipping_description {
+  @apply hidden;
 }

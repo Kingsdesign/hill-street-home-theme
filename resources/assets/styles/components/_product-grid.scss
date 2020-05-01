@@ -21,33 +21,67 @@
 
 // Product grid tiles
 .woocommerce ul.products .product>a {
-  @apply relative block overflow-hidden;
-  padding-bottom: 100%;
+  @apply relative block overflow-hidden mb-3;
   background-image: none;
   transition: 0.2s box-shadow ease-in-out 120ms;
 
-  &:after {
-    content: "";
-    @apply absolute left-0 top-0 w-full h-full bg-blue-100 opacity-0;
-    transition: 0.2s opacity ease-in-out 120ms;
-  }
-
-  img {
-    @apply absolute w-full h-full;
-    left: 50%;
-    top: 50%;
-    //transform: translate3d(-50%, -50%, 0) scale(1.0, 1.0);
-    transform: translate3d(-50%, -50%, 0);
-    transition: 0.2s transform ease-in-out 120ms;
-  }
-
   h2 {
-    @apply absolute text-xl; // border-b-4 border-solid text-xl border-blue-100;
-    max-width: 75%;
-    //border-color: rgba(#6782AD, 0.5); // blue.300
-    left: 1rem;
-    top: 1rem;
+    @apply text-lg py-2; // border-b-4 border-solid text-xl border-blue-100;
+    background: rgba(255, 255, 255, 0.9);
     transition: 0.2s border ease-in-out 120ms;
+
+    @screen lg {
+      background: rgba(255, 255, 255, 0.5);
+      @apply px-5 py-5 text-xl absolute;
+      max-width: 75%;
+    }
+
+
+    &::after {
+      content: "";
+      @apply bg-blue-400 w-3/4 block mt-1;
+      max-width: 4rem;
+      height: 0.1666rem;
+    }
+  }
+
+  .price {
+    background: rgba(255, 255, 255, 0.9);
+    @apply px-3 py-3 text-gray-700 block text-right;
+
+    ins {
+      @apply no-underline;
+    }
+
+    @screen lg {
+      background: rgba(255, 255, 255, 0.5);
+      @apply px-5 absolute font-bold bottom-0 right-0;
+
+      del {
+        @apply font-normal;
+      }
+    }
+  }
+
+
+  @screen lg {
+    @apply mb-0;
+    padding-bottom: 100%;
+
+    &:after {
+      content: "";
+      @apply absolute left-0 top-0 w-full h-full bg-blue-100 opacity-0;
+      transition: 0.2s opacity ease-in-out 120ms;
+    }
+
+    img {
+      @apply absolute w-full h-full;
+      left: 50%;
+      top: 50%;
+      //transform: translate3d(-50%, -50%, 0) scale(1.0, 1.0);
+      transform: translate3d(-50%, -50%, 0);
+      transition: 0.2s transform ease-in-out 120ms;
+    }
   }
 
   &:hover {
@@ -68,7 +102,7 @@
 }
 
 // Product grid category tiles
-.woocommerce ul.products .product.product-category a {
+/*.woocommerce ul.products .product.product-category a {
   h2 {
     @apply absolute border-b-4 border-solid text-xl border-blue-100;
   }
@@ -76,7 +110,7 @@
   &:hover h2 {
     @apply border-blue-200;
   }
-}
+}*/
 
 //Category grid
 .product-grid.category-grid {

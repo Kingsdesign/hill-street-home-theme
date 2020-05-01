@@ -21,11 +21,11 @@
       </div>
       <div class="px-4 w-full md:w-1/2 lg:w-1/4 mb-12">
         <h3 class="text-2xl mb-6">Contact</h3>
-        <p><strong>phone</strong></p>
+        <p><strong>Phone</strong></p>
         <p>West Hobart <a href="tel:0362346849">(03) 6234 6849</a></p>
         <p>Devonport <a href="tel:0362346849">(03) 6127 5355</a></p>
         <div class="mb-6"></div>
-        <p><strong>email</strong></p>
+        <p><strong>Email</strong></p>
         <p><a href="mailto:hampers@hillstreetgrocer.com">hampers@hillstreetgrocer.com</a></p>
         <div class="border-b border-solid border-white mx-12 py-8 md:hidden"></div>
       </div>
@@ -36,7 +36,9 @@
           {!! wp_nav_menu(['theme_location' => 'legal_navigation', 'menu_class' => 'nav']) !!}
           @endif
         </nav>
-        <p>Hill Street Home (M & D Nikitaras Pty Ltd) - ABN 71 090 743 196</p>
+        <p data-sc-if="%location%==='devonport'">Hill Street Home (Hill Street North Pty Ltd) – ABN 68 604 544
+          818</p>
+        <p data-sc-else>Hill Street Home (M & D Nikitaras Pty Ltd) - ABN 71 090 743 196</p>
         <p>All prices in AUD</p>
       </div>
     </div>

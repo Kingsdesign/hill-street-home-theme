@@ -77,3 +77,16 @@
   clip: auto;
   white-space: normal;
 }
+
+
+.alert {
+  @apply bg-gray-50 border border-solid border-gray-300 text-black px-4 py-2 max-w-xl mx-auto mb-3;
+
+  &:last-of-type {
+    @apply mb-12;
+  }
+
+  &.alert-warning {
+    @apply bg-orange-100 border-orange-300 text-orange-900;
+  }
+}

@@ -20,9 +20,19 @@
       @apply order-last;
     }
   }
+
+  .woocommerce-error {
+    @apply bg-red-100 text-red-900 px-4 py-2;
+
+    &>li {
+      @apply mb-2 list-inside list-disc;
+    }
+  }
 }
 
 .woocommerce-pagination {
+  @apply mt-4;
+
   .page-numbers {
     @apply flex items-center justify-center;
 

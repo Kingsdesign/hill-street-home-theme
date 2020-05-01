@@ -49,13 +49,13 @@ class App extends Controller {
     }
 
     $current_page = sanitize_post($GLOBALS['wp_the_query']->get_queried_object());
-    if (!$current_page) {
-      return null;
+    if ($current_page && \property_exists($current_page, 'post_name')) {
+      return $current_page->post_name;
     }
-
-    // Get the page slug
-    $slug = $current_page->post_name;
-    return $slug;
+    if ($current_page instanceof WP_Post_Type) {
+      return $current_page->name;
+    }
+    return null;
   }
 
   /**
