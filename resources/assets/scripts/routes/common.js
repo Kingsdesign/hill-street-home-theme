@@ -240,13 +240,13 @@ function replaceAssets(html) {
     //"/plugins/woocommerce/assets/js/frontend/add-to-cart-variation.js",
 
     //
-    "/themes/hillsthome/jquery-3.5.0.min.js",
-    "/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.js",
-    "/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
+    //"/themes/hillsthome/jquery-3.5.0.min.js",
+    //"/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.js",
+    /*"/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
     "/plugins/woocommerce/assets/js/frontend/single-product.js",
     //"/plugins/woocommerce/assets/js/js-cookie/js.cookie.js",
     "/plugins/woocommerce/assets/js/frontend/woocommerce.js",
-    //"/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
+    "/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
     //"/plugins/woocommerce/assets/js/jquery-tiptip/jquery.tipTip.min.js",
     "/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
     "/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
@@ -256,6 +256,25 @@ function replaceAssets(html) {
     //"/wp-content/themes/hillsthome/dist/scripts/main.js",
     //"/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
     //"/wp-content/plugins/woocommerce/assets/js/accounting/accounting.js",
+    "/wp-content/plugins/woocommerce-product-addons/assets/js/addons.js",*/
+
+    //"/wp-content/t/themes/hillsthome/jquery-3.5.0.min.js",
+    "/wp-content/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
+    //"/wp-content/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.js",
+    "/wp-content/plugins/woocommerce/assets/js/frontend/single-product.js",
+    //"/wp-content/plugins/woocommerce/assets/js/js-cookie/js.cookie.js",
+    "/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.js",
+    "/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
+    "/wp-content/plugins/woocommerce/assets/js/jquery-tiptip/jquery.tipTip.min.js",
+    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
+    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
+    //"/wp-includes/js/underscore.min.js",
+    //"/wp-includes/js/wp-util.js",
+    "/wp-content/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
+    //"/wp-content/themes/hillsthome/dist/scripts/main.js",
+    //"/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
+    "/wp-content/plugins/woocommerce/assets/js/frontend/add-to-cart-variation.js",
+    "/wp-content/plugins/woocommerce/assets/js/accounting/accounting.js",
     "/wp-content/plugins/woocommerce-product-addons/assets/js/addons.js",
   ];
 
@@ -275,19 +294,36 @@ function replaceAssets(html) {
     },
     { unchanged: true }
   );
-  const inlineScriptsDiff = diffAssets(
+  /*const inlineScriptsDiff = diffAssets(
     Array.from(currentAssets.scripts.inline),
     Array.from(newAssets.scripts.inline),
     (a, b) => {
       return a.id && b.id && a.id === b.id;
-    }
-  );
+    },
+    { unchanged: true }
+  );*/
 
   //Add & remove inline scripts
-  inlineScriptsDiff.removed.forEach((asset) => {
+  //This seems to break some localisation stuff
+  /*inlineScriptsDiff.removed.forEach((asset) => {
+    asset.remove();
+  });*/
+  /*inlineScriptsDiff.added.forEach((asset) => {
+    const s = document.createElement("script");
+    if (asset.type) s.type = asset.type;
+    if (asset.id) s.id = asset.id;
+
+    s.innerHTML = asset.innerHTML;
+    body.appendChild(s);
+  });*/
+
+  //Remove and add ALL inline scripts
+  Array.from(currentAssets.scripts.inline).forEach((asset) => {
+    if (asset.id === "__bs_script__") return;
     asset.remove();
   });
-  inlineScriptsDiff.added.forEach((asset) => {
+  Array.from(newAssets.scripts.inline).forEach((asset) => {
+    if (asset.id === "__bs_script__") return;
     const s = document.createElement("script");
     if (asset.type) s.type = asset.type;
     if (asset.id) s.id = asset.id;
@@ -303,7 +339,7 @@ function replaceAssets(html) {
 
   //Reload always reload scripts
   scriptsDiff.unchanged.forEach((asset) => {
-    if (assetInList(asset.src, alwaysReloadScripts)) {
+    if (asset.src && assetInList(asset.src, alwaysReloadScripts)) {
       const s = document.createElement("script");
       if (asset.type) s.type = asset.type;
       if (asset.id) s.id = asset.id;
@@ -322,18 +358,5 @@ function replaceAssets(html) {
 
     s.src = asset.src;
     body.appendChild(s);
-  });
-  //Reload jquery
-  let src = "/wp-content/themes/hillsthome/jquery-3.5.0.min.js";
-  Array.from(currentAssets.scripts.linked).forEach((asset) => {
-    if (asset.src.substr(src.length * -1) === src) {
-      const s = document.createElement("script");
-      if (asset.type) s.type = asset.type;
-      if (asset.id) s.id = asset.id;
-
-      s.src = asset.src;
-      asset.remove();
-      body.appendChild(s);
-    }
   });
 }
