@@ -455,7 +455,7 @@ add_action('woocommerce_single_product_summary', function () {
   //remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
   add_action('woocommerce_single_product_summary', function () {
     echo '<div class="delivery-no-fresh hidden"><div class="bg-gray-50 border border-solid border-gray-300 px-3 py-4 my-3 text-center">';
-    echo '<p>We\'re sorry, but it looks like we can\'t deliver this product to you.</p>';
+    echo '<p>We\'re sorry, but it looks like we can\'t deliver this product to you. We do offer pickup from <strong data-sc-val="location_display"></strong>.</p>';
     echo '</div></div>';
   }, 30);
   //}
