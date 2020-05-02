@@ -1,4 +1,5 @@
 import Glide from "@glidejs/glide";
+import scData from "../util/sc-data";
 
 export default {
   init() {},
@@ -96,6 +97,21 @@ export default {
           glideTrack.style.height = `${activeSlideHeight}px`;
         }
       }
+
+      //Maybe hide addons
+      const isAddonsHidden =
+        scData("location") === "devonport" &&
+        window.main_data &&
+        window.main_data.single_product &&
+        window.main_data.single_product.hide_addons;
+
+      Array.from(document.querySelectorAll(".addons-wrapper")).forEach((el) => {
+        if (isAddonsHidden) {
+          el.remove();
+        } else {
+          el.classList.remove("hidden");
+        }
+      });
     });
   },
 };

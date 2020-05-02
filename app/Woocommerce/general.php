@@ -359,13 +359,21 @@ add_action('woocommerce_new_order', function ($order_id, $order) {
  * Hide addons if it's a hamper and devonport
  */
 
-add_action('woocommerce_before_single_product', function () {
-  global $post;
-  if (is_product() && (has_term('edible', 'product_cat', $post) || has_term('fresh', 'product_cat', $post)) && sc_location_is('devonport') && get_post_field('slug', $post) !== 'gift-card') {
-    remove_action('woocommerce_before_add_to_cart_button', array($GLOBALS['Product_Addon_Display'], 'display'), 10);
-    remove_action('woocommerce_before_variations_form', array($GLOBALS['Product_Addon_Display'], 'reposition_display_for_variable_product'), 10);
-  }
-});
+//add_action('woocommerce_before_single_product', function () {
+//global $post;
+//if (is_product() && (has_term('edible', 'product_cat', $post) || has_term('fresh', 'product_cat', $post)) && sc_location_is('devonport') && get_post_field('slug', $post) !== 'gift-card') {
+//remove_action('woocommerce_before_add_to_cart_button', array($GLOBALS['Product_Addon_Display'], 'display'), 10);
+//remove_action('woocommerce_before_variations_form', array($GLOBALS['Product_Addon_Display'], 'reposition_display_for_variable_product'), 10);
+
+//}
+//});
+
+add_action('woocommerce_product_addons_start', function ($post_id) {
+  echo '<div class="addons-wrapper hidden">';
+}, 10, 1);
+add_action('woocommerce_product_addons_end', function ($post_id) {
+  echo '</div>';
+}, 10, 1);
 
 /**
  * Helper function to check if product can be shipped

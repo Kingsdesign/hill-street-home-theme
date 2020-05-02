@@ -13,6 +13,16 @@ use Roots\Sage\Template\BladeProvider;
 add_action('wp_enqueue_scripts', function () {
   wp_enqueue_style('sage/main.css', asset_path('styles/main.css'), false, null);
   wp_enqueue_script('sage/main.js', asset_path('scripts/main.js'), ['jquery'], null, true);
+  $main_data = [];
+  if (is_product()) {
+    $main_data['single_product'] = [
+      'hide_addons' => (has_term('edible', 'product_cat', $post) || has_term('fresh', 'product_cat', $post)) && get_post_field('slug', $post) !== 'gift-card',
+    ];
+  }
+  if (class_exists('\WC_OrderByLocation')) {
+    $main_data['cookie_name'] = \WC_OrderByLocation::$location_var_name;
+  }
+  wp_localize_script('sage/main.js', 'main_data', $main_data);
 
   /**
    * Store chooser needs some logic
