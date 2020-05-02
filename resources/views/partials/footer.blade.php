@@ -26,7 +26,8 @@
         <p>Devonport <a href="tel:0362346849">(03) 6127 5355</a></p>
         <div class="mb-6"></div>
         <p><strong>Email</strong></p>
-        <p><a href="mailto:hampers@hillstreetgrocer.com">hampers@hillstreetgrocer.com</a></p>
+        <p>West Hobart <a href="mailto:hampers@hillstreetgrocer.com">hampers@hillstreetgrocer.com</a></p>
+        <p>Devonport <a href="mailto:home.devonport@hillstreetgrocer.com">home.devonport@hillstreetgrocer.com</a></p>
         <div class="border-b border-solid border-white mx-12 py-8 md:hidden"></div>
       </div>
       <div class="px-4 w-full md:w-1/2 lg:w-1/4 mb-12">

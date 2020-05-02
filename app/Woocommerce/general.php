@@ -495,3 +495,22 @@ add_action('woocommerce_proceed_to_checkout', function () {
   //echo sage('blade')->compiler()->compileString('{!! App::relative_url(wc_get_shop_url()) !!}');
   //echo sage('blade')->compiler()->compileString('<a href="@php App::relative_url(wc_get_shop_url()) @php">@svg(MdChevronLeft) Continue shopping</a>');
 });
+
+/**
+ * Never show alcohol as a related product
+ */
+add_filter('woocommerce_related_products', function ($related_posts, $product_id, $args) {
+  // HERE define your product category slug
+  $term_slug = 'wine-and-spirits';
+
+  // Get the product Ids in the defined product category
+  $exclude_ids = wc_get_products(array(
+    'status' => 'publish',
+    'limit' => -1,
+    'category' => array($term_slug),
+    'return' => 'ids',
+  ));
+
+  return array_diff($related_posts, $exclude_ids);
+}
+  , 10, 3);
