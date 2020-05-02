@@ -206,7 +206,8 @@ add_action('after_setup_theme', function () {
   });
 
   sage("blade")->compiler()->directive("svg", function ($svgName) {
-    $svgContent = @file_get_contents(asset_path("svg/" . $svgName . ".svg"));
+    //$svgContent = @file_get_contents(asset_path("svg/" . $svgName . ".svg"));
+    $svgContent = @file_get_contents(get_template_directory() . "/assets/svg/" . $svgName . ".svg");
     if (empty($svgContent)) {
       return null;
     }
