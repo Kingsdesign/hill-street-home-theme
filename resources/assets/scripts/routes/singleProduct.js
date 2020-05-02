@@ -112,6 +112,43 @@ export default {
           el.classList.remove("hidden");
         }
       });
+
+      //Maybe show undeliverable
+      fetch(window.main_data.ajax_url, {
+        method: "POST",
+        credentials: "include", // include, *same-origin, omit
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        body:
+          "action=product_deliverable&product=" +
+          window.main_data.single_product.product_id,
+      })
+        .then((r) => {
+          if (r.ok) return r;
+          throw new Error(r.statusText);
+        })
+        .then((r) => r.json())
+        .then((resp) => {
+          const isUndeliverable = resp === false;
+          Array.from(document.querySelectorAll(".delivery-no-fresh")).forEach(
+            (el) => {
+              if (isUndeliverable) {
+                el.classList.remove("hidden");
+              } else {
+                el.remove();
+              }
+            }
+          );
+
+          if (isUndeliverable) {
+            Array.from(
+              document.querySelectorAll(".single_add_to_cart_button")
+            ).forEach((el) => {
+              el.remove();
+            });
+          }
+        });
     });
   },
 };

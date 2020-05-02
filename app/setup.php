@@ -11,12 +11,14 @@ use Roots\Sage\Template\BladeProvider;
  * Theme assets
  */
 add_action('wp_enqueue_scripts', function () {
+  global $post;
   wp_enqueue_style('sage/main.css', asset_path('styles/main.css'), false, null);
   wp_enqueue_script('sage/main.js', asset_path('scripts/main.js'), ['jquery'], null, true);
-  $main_data = [];
+  $main_data = ['ajax_url' => admin_url('admin-ajax.php')];
   if (is_product()) {
     $main_data['single_product'] = [
       'hide_addons' => (has_term('edible', 'product_cat', $post) || has_term('fresh', 'product_cat', $post)) && get_post_field('slug', $post) !== 'gift-card',
+      'product_id' => $post->ID,
     ];
   }
   if (class_exists('\WC_OrderByLocation')) {

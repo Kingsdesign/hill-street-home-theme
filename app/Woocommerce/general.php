@@ -433,20 +433,32 @@ function is_product_deliverable($product = null) {
   return !(!$is_tasmania || !$is_good_postcode || $is_bad_suburb);
 }
 
+function ajax_is_product_deliverable() {
+  if (!isset($_POST['product'])) {
+    return true;
+  }
+
+  wp_send_json(is_product_deliverable($_POST['product']));
+  exit;
+}
+
+add_action('wp_ajax_product_deliverable', __NAMESPACE__ . '\\ajax_is_product_deliverable');
+add_action('wp_ajax_nopriv_product_deliverable', __NAMESPACE__ . '\\ajax_is_product_deliverable');
+
 /**
  * Hide add to cart, and show message if its a no fresh
  * * @hooked woocommerce_single_product_summary woocommerce_template_single_add_to_cart - 30
  */
 add_action('woocommerce_single_product_summary', function () {
 
-  if (!is_product_deliverable()) {
-    remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
-    add_action('woocommerce_single_product_summary', function () {
-      echo '<div class="delivery-no-fresh"><div class="bg-gray-50 border border-solid border-gray-300 px-3 py-4 my-3 text-center">';
-      echo '<p>We\'re sorry, but it looks like we can\'t deliver this product to you.</p>';
-      echo '</div></div>';
-    }, 30);
-  }
+  //if (!is_product_deliverable()) {
+  //remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
+  add_action('woocommerce_single_product_summary', function () {
+    echo '<div class="delivery-no-fresh hidden"><div class="bg-gray-50 border border-solid border-gray-300 px-3 py-4 my-3 text-center">';
+    echo '<p>We\'re sorry, but it looks like we can\'t deliver this product to you.</p>';
+    echo '</div></div>';
+  }, 30);
+  //}
 
 }, 29);
 
