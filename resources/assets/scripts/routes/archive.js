@@ -1,4 +1,5 @@
 import Glide from "@glidejs/glide";
+import scData from "../util/sc-data";
 
 export default {
   init() {
@@ -28,5 +29,16 @@ export default {
         );
       }
     );
+
+    //Hide some categories
+    if (scData("location") === "devonport") {
+      Array.from(
+        document.querySelectorAll(
+          ".product-category.product-category--wine-and-spirits"
+        )
+      ).forEach((el) => {
+        el.remove();
+      });
+    }
   },
 };

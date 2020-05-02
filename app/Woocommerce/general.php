@@ -514,3 +514,15 @@ add_filter('woocommerce_related_products', function ($related_posts, $product_id
   return array_diff($related_posts, $exclude_ids);
 }
   , 10, 3);
+
+/**
+ * Add class to loop items
+ */
+/*add_filter('woocommerce_post_class', function ($classes, $product) {
+$classes[] = 'loop-item--';
+return $classes;
+}, 10, 2);*/
+add_filter('product_cat_class', function ($classes, $class, $category) {
+  $classes[] = 'product-category--' . esc_attr($category->slug);
+  return $classes;
+}, 10, 3);
