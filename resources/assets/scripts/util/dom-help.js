@@ -38,7 +38,7 @@ export function selectElements(selector, context = document) {
   return o;
 }
 
-export function trigger(eventName, el, data = {}) {
+export function trigger(eventName, el = document, data = {}) {
   let event;
   if (window.CustomEvent && typeof window.CustomEvent === "function") {
     event = new CustomEvent(eventName, { detail: data });

@@ -86,6 +86,8 @@ export default {
       });
       routes.loadEvents();
       cl.responsive();
+
+      trigger("hsh-fe::after_enter", document);
     });
     barba.hooks.afterLeave((data) => {
       window.scrollTo(0, 0);
@@ -101,6 +103,15 @@ export default {
       );
       var bodyClasses = $(response).filter("notbody").attr("class");
       $("body").attr("class", bodyClasses + " barba-transitioned");
+
+      trigger("hsh-fe::after_leave", document);
+
+      if (typeof window.ga !== "undefined") {
+        window.ga("gtm1.send", {
+          hitType: "pageview",
+          page: location.pathname,
+        });
+      }
     });
   },
 
@@ -266,8 +277,8 @@ function replaceAssets(html) {
     "/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.js",
     "/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
     "/wp-content/plugins/woocommerce/assets/js/jquery-tiptip/jquery.tipTip.min.js",
-    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
-    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
+    //"/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
+    //"/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
     //"/wp-includes/js/underscore.min.js",
     //"/wp-includes/js/wp-util.js",
     "/wp-content/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
