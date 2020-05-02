@@ -277,8 +277,8 @@ function replaceAssets(html) {
     "/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.js",
     "/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
     "/wp-content/plugins/woocommerce/assets/js/jquery-tiptip/jquery.tipTip.min.js",
-    //"/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
-    //"/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
+    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
+    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
     //"/wp-includes/js/underscore.min.js",
     //"/wp-includes/js/wp-util.js",
     "/wp-content/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
@@ -350,17 +350,17 @@ function replaceAssets(html) {
 
   //Reload always reload scripts
   scriptsDiff.unchanged.forEach((asset) => {
-    if (asset.src && assetInList(asset.src, alwaysReloadScripts)) {
-      const s = document.createElement("script");
-      if (asset.type) s.type = asset.type;
-      if (asset.id) s.id = asset.id;
+    //if (asset.src && assetInList(asset.src, alwaysReloadScripts)) {
+    const s = document.createElement("script");
+    if (asset.type) s.type = asset.type;
+    if (asset.id) s.id = asset.id;
 
-      s.src = asset.src;
+    s.src = asset.src;
 
-      asset.remove();
+    asset.remove();
 
-      body.appendChild(s);
-    }
+    body.appendChild(s);
+    //}
   });
   scriptsDiff.added.forEach((asset) => {
     const s = document.createElement("script");
