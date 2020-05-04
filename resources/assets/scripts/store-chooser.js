@@ -267,6 +267,9 @@ function onShowModal(modal) {
       { method, suburb, postcode, location },
       { expires: 365 }
     );
+    Cookies.remove("wc_obl_stock_location");
+    Cookies.remove("wc_obl_stock_location", { path: "" });
+    Cookies.set("wc_obl_stock_location", location, { expires: 365 });
     //MicroModal.close("modal-store-chooser");
     renderDomData();
 

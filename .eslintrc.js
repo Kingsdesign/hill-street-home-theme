@@ -30,6 +30,7 @@ module.exports = {
     ],
   },
   rules: {
+    "no-unreachable": 0,
     "no-unused-vars": 0,
     "no-extra-semi": 0,
     "no-console": 0,

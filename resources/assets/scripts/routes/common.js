@@ -39,6 +39,7 @@ function diffScripts(currentScripts, newScripts) {
 }
 
 const observer = lozad();
+let routes;
 
 export default {
   init() {
@@ -78,7 +79,7 @@ export default {
       trigger("store-chooser::maybe_show", document);
 
       observer.observe();
-      var routes = new Router({
+      routes = new Router({
         home,
         //aboutUs,
         singleProduct,
@@ -88,6 +89,9 @@ export default {
       cl.responsive();
 
       trigger("hsh-fe::after_enter", document);
+    });
+    barba.hooks.beforeLeave((data) => {
+      routes.unloadEvents();
     });
     barba.hooks.afterLeave((data) => {
       window.scrollTo(0, 0);
@@ -119,15 +123,25 @@ export default {
     //Mobile nav
     let isOpen = false;
 
+    const navLinkListner = () => {
+      isOpen = false;
+      isOpenSideEffect();
+    };
+
     const isOpenSideEffect = () => {
+      const primaryNav = document.getElementById("primary-navigation");
       if (isOpen) {
-        document.getElementById("primary-navigation").classList.add("active");
+        primaryNav.classList.add("active");
         document.body.classList.add("noscroll");
+        Array.from(primaryNav.querySelectorAll("a")).forEach((link) => {
+          link.addEventListener("click", navLinkListner);
+        });
       } else {
-        document
-          .getElementById("primary-navigation")
-          .classList.remove("active");
+        primaryNav.classList.remove("active");
         document.body.classList.remove("noscroll");
+        Array.from(primaryNav.querySelectorAll("a")).forEach((link) => {
+          link.removeEventListener("click", navLinkListner);
+        });
       }
     };
 
@@ -153,7 +167,9 @@ function diffAssets(
   let addedAssets = newAssets.filter((x) => notIncludes(x, currentAssets));
 
   let unchangedAssets = unchanged
-    ? newAssets.filter((x) => includes(x, currentAssets))
+    ? removedAssets.length
+      ? currentAssets.filter((x) => notIncludes(x, removedAssets))
+      : currentAssets
     : null;
 
   function includes(asset, arr) {
@@ -305,6 +321,7 @@ function replaceAssets(html) {
     },
     { unchanged: true }
   );
+
   /*const inlineScriptsDiff = diffAssets(
     Array.from(currentAssets.scripts.inline),
     Array.from(newAssets.scripts.inline),
@@ -343,13 +360,45 @@ function replaceAssets(html) {
     body.appendChild(s);
   });
 
+  const neverReloadScripts = [
+    "/wp-content/themes/hillsthome/dist/scripts/main.js",
+    //"/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
+  ];
+
+  //And all linked scripts
+  let mainScript;
+  Array.from(currentAssets.scripts.linked).forEach((asset) => {
+    if (assetInList(asset.src, neverReloadScripts)) {
+      mainScript = asset;
+      return;
+    }
+    asset.remove();
+  });
+  Array.from(newAssets.scripts.linked).forEach((asset) => {
+    if (assetInList(asset.src, neverReloadScripts)) return;
+    const s = document.createElement("script");
+    if (asset.type) s.type = asset.type;
+    if (asset.id) s.id = asset.id;
+
+    s.src = asset.src;
+
+    //console.log("add", s.src);
+    if (mainScript) {
+      body.insertBefore(s, mainScript);
+    } else {
+      body.appendChild(s);
+    }
+  });
+
   //Add & removed linked scripts
-  scriptsDiff.removed.forEach((asset) => {
+  /*scriptsDiff.removed.forEach((asset) => {
     asset.remove();
   });
 
+  
   //Reload always reload scripts
   scriptsDiff.unchanged.forEach((asset) => {
+    if (assetInList(asset.src, neverReloadScripts)) return;
     //if (asset.src && assetInList(asset.src, alwaysReloadScripts)) {
     const s = document.createElement("script");
     if (asset.type) s.type = asset.type;
@@ -359,6 +408,7 @@ function replaceAssets(html) {
 
     asset.remove();
 
+    //console.log("add", s.src);
     body.appendChild(s);
     //}
   });
@@ -369,5 +419,5 @@ function replaceAssets(html) {
 
     s.src = asset.src;
     body.appendChild(s);
-  });
+  });*/
 }
