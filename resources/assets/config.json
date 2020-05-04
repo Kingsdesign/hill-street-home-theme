@@ -3,7 +3,8 @@
     "main": ["./scripts/main.js", "./styles/main.scss"],
     "customizer": ["./scripts/customizer.js"],
     "store-chooser": ["@babel/polyfill", "./scripts/store-chooser.js"],
-    "checkout": ["./scripts/checkout.js", "./styles/checkout.scss"]
+    "checkout": ["./scripts/checkout.js", "./styles/checkout.scss"],
+    "single-product": ["./scripts/single-product"]
   },
   "publicPath": "/wp-content/themes/hillsthome",
   "devUrl": "https://dev-hsh.kingsdesign.info",

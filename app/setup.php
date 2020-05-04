@@ -20,6 +20,8 @@ add_action('wp_enqueue_scripts', function () {
       'hide_addons' => (has_term('edible', 'product_cat', $post) || has_term('fresh', 'product_cat', $post)) && get_post_field('slug', $post) !== 'gift-card',
       'product_id' => $post->ID,
     ];
+
+    wp_enqueue_script('sage/single-product.js', asset_path('scripts/single-product.js'), ['jquery'], null, true);
   }
   if (class_exists('\WC_OrderByLocation')) {
     $main_data['cookie_name'] = \WC_OrderByLocation::$location_var_name;

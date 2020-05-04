@@ -46,10 +46,10 @@ ready(() => {
     const cutoffTime = add(startOfToday(), { hours: 11 }); //11am today
     const isAfterCutoff = isAfter(new Date(), cutoffTime);
 
-    let minDate = startOfToday();
-    if (isAfterCutoff) {
-      minDate = startOfTomorrow();
-    }
+    //let minDate = startOfToday();
+    //if (isAfterCutoff) {
+    let minDate = startOfTomorrow();
+    //}
     $(datePicker).datepicker("option", "minDate", minDate);
     //$(datePicker).datepicker("option", "defaultDate", 1);
     /*$(datePicker).datepicker("option", "beforeShowDay", (date) => {
