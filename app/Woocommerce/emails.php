@@ -97,13 +97,26 @@ add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_ad
   if ($sent_to_admin && $postcode = $order->get_meta('_order_sc_postcode')) {
     $fields['postcode'] = ['value' => $postcode, 'label' => 'Postcode'];
   }
-  if ($sent_to_admin) {
-    $fields['packed_by'] = ['value' => '___', 'label' => 'Packed By'];
-    $fields['completed_by'] = ['value' => '___', 'label' => 'Completed By'];
-    $fields['courier_used'] = ['value' => '___', 'label' => 'Courier Used'];
-  }
+  /*if ($sent_to_admin) {
+  $fields['packed_by'] = ['value' => '___', 'label' => 'Packed By'];
+  $fields['completed_by'] = ['value' => '___', 'label' => 'Completed By'];
+  $fields['courier_used'] = ['value' => '___', 'label' => 'Courier Used'];
+  }*/
   return $fields;
 }, 10, 3);
+
+/**
+ * Add fields to fill in by hand. What?
+ */
+add_action('woocommerce_email_customer_details', function ($order, $sent_to_admin, $plain_text, $email) {
+  if (!$email->is_customer_email() && ($email->id === 'new_order')) {
+    echo '<p>&nbsp;</p>';
+    echo '<p>================================</p>';
+    echo '<p>Packed by: _________________________________</p>';
+    echo '<p>Completed by: _________________________________</p>';
+    echo '<p>Courier used: _________________________________</p>';
+  }
+}, 10, 4);
 
 /**
  * Direct emails to appropriate stores
