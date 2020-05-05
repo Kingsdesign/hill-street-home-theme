@@ -43,13 +43,13 @@ ready(() => {
   const datePicker = document.querySelector("#date.checkout-date-picker");
   if (datePicker) {
     //datePicker.datepicker('option','minDate')
-    const cutoffTime = add(startOfToday(), { hours: 11 }); //11am today
+    const cutoffTime = add(startOfToday(), { hours: 15 }); //11am today
     const isAfterCutoff = isAfter(new Date(), cutoffTime);
 
-    //let minDate = startOfToday();
-    //if (isAfterCutoff) {
     let minDate = startOfTomorrow();
-    //}
+    if (isAfterCutoff) {
+      minDate = add(minDate, { days: 1 });
+    }
     $(datePicker).datepicker("option", "minDate", minDate);
     //$(datePicker).datepicker("option", "defaultDate", 1);
     /*$(datePicker).datepicker("option", "beforeShowDay", (date) => {

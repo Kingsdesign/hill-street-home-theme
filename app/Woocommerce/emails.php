@@ -57,10 +57,14 @@ add_action('woocommerce_email_order_details', function ($order, $sent_to_admin, 
  */
 //woocommerce_email_customer_details
 add_action('woocommerce_email_order_details', function ($order, $sent_to_admin, $plain_text, $email) {
-  if ($email->id === 'customer_processing_order' || $email->id === 'customer_completed_order') {
+  if ($email->id === 'customer_processing_order' || $email->id === 'customer_completed_order' || $email->id === 'customer_on_hold_order') {
+    $location = $order->get_meta('_stock_location');
     echo '<p>If you have any questions please don’t hesitate to get in touch with us on:</p>';
-    echo '<p>03 6234 6849 for West Hobart</p>';
-    echo '<p>03 6127 5355 for Devonport</p>';
+    if ($location === 'devonport') {
+      echo '<p>03 6127 5355 for Devonport</p>';
+    } else {
+      echo '<p>03 6234 6849 for West Hobart</p>';
+    }
     echo '<p>&nbsp;</p>';
     echo '<p>Kind regards,<br/><br/>The Hill Street Home team.</p>';
   }
@@ -92,6 +96,11 @@ add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_ad
   }
   if ($sent_to_admin && $postcode = $order->get_meta('_order_sc_postcode')) {
     $fields['postcode'] = ['value' => $postcode, 'label' => 'Postcode'];
+  }
+  if ($sent_to_admin) {
+    $fields['packed_by'] = ['value' => '', 'label' => 'Packed By'];
+    $fields['completed_by'] = ['value' => '', 'label' => 'Completed By'];
+    $fields['courier_used'] = ['value' => '', 'label' => 'Courier Used'];
   }
   return $fields;
 }, 10, 3);
@@ -139,3 +148,14 @@ function conditional_email_recipient($recipient, $order) {
   return $recipient;
 }
 add_filter('woocommerce_email_recipient_new_order', __NAMESPACE__ . '\\conditional_email_recipient', 10, 2);
+
+/**
+ * Remove styles from admin emails
+ */
+add_filter('woocommerce_email_styles', function ($css, $email) {
+  if (!$email->is_customer_email()) {
+    return "";
+  }
+
+  return $css;
+}, 10, 2);

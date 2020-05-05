@@ -362,7 +362,7 @@ function replaceAssets(html) {
 
   const neverReloadScripts = [
     "/wp-content/themes/hillsthome/dist/scripts/main.js",
-    //"/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
+    "/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
   ];
 
   //And all linked scripts
