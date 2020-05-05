@@ -98,9 +98,9 @@ add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_ad
     $fields['postcode'] = ['value' => $postcode, 'label' => 'Postcode'];
   }
   if ($sent_to_admin) {
-    $fields['packed_by'] = ['value' => '', 'label' => 'Packed By'];
-    $fields['completed_by'] = ['value' => '', 'label' => 'Completed By'];
-    $fields['courier_used'] = ['value' => '', 'label' => 'Courier Used'];
+    $fields['packed_by'] = ['value' => '___', 'label' => 'Packed By'];
+    $fields['completed_by'] = ['value' => '___', 'label' => 'Completed By'];
+    $fields['courier_used'] = ['value' => '___', 'label' => 'Courier Used'];
   }
   return $fields;
 }, 10, 3);
