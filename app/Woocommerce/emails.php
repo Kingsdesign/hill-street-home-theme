@@ -110,8 +110,7 @@ add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_ad
  */
 add_action('woocommerce_email_customer_details', function ($order, $sent_to_admin, $plain_text, $email) {
   if (!$email->is_customer_email() && ($email->id === 'new_order')) {
-    echo '<p>&nbsp;</p>';
-    echo '<p>================================</p>';
+    //echo '<p>================================</p>';
     echo '<p>Packed by: _________________________________</p>';
     echo '<p>Completed by: _________________________________</p>';
     echo '<p>Courier used: _________________________________</p>';
