@@ -6,6 +6,7 @@ import {
   isAfter,
   startOfTomorrow,
   isBefore,
+  startOfDay,
 } from "date-fns";
 
 const data = window.custom_checkout_data;
@@ -46,10 +47,11 @@ ready(() => {
     const cutoffTime = add(startOfToday(), { hours: 15 }); //11am today
     const isAfterCutoff = isAfter(new Date(), cutoffTime);
 
-    let minDate = startOfTomorrow();
+    let minDate = startOfDay(new Date(2020, 4, 11));
+    /*
     if (isAfterCutoff) {
       minDate = add(minDate, { days: 1 });
-    }
+    }*/
     $(datePicker).datepicker("option", "minDate", minDate);
     //$(datePicker).datepicker("option", "defaultDate", 1);
     /*$(datePicker).datepicker("option", "beforeShowDay", (date) => {

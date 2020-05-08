@@ -101,7 +101,8 @@ body.single-product .product {
 
   @screen md {
     @apply grid gap-4;
-    grid-template-columns: calc(50% - 1rem) calc(theme("screens.md") / 2) theme("screens.md");
+
+    grid-template-columns: calc(50% - 1.5rem) calc(theme("screens.md") / 2) theme("screens.md");
 
 
     .summary {
@@ -114,11 +115,11 @@ body.single-product .product {
 
   @screen lg {
     @apply gap-8;
-    grid-template-columns: calc(50% - 1rem) calc(theme("screens.lg") / 2) theme("screens.lg");
+    grid-template-columns: calc(50% - 2.5rem) calc(theme("screens.lg") / 2) theme("screens.lg");
   }
 
   @screen xl {
-    grid-template-columns: calc(50% - 1rem) calc(theme("screens.xl") / 2) theme("screens.xl");
+    grid-template-columns: calc(50% - 2.5rem) calc(theme("screens.xl") / 2) theme("screens.xl");
   }
 }
 
