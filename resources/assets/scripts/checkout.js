@@ -48,6 +48,9 @@ ready(() => {
     const isAfterCutoff = isAfter(new Date(), cutoffTime);
 
     let minDate = startOfDay(new Date(2020, 4, 11));
+    if (cookieData.location === "devonport") {
+      minDate = startOfDay(new Date(2020, 4, 13));
+    }
     /*
     if (isAfterCutoff) {
       minDate = add(minDate, { days: 1 });
