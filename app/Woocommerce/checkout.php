@@ -174,7 +174,6 @@ function merge_date_restrictions_with_defaults($defaults, $restrictions) {
       } else {
         $end_date->setTime(0, 0, 0);
         if ($today_now->diff($date)->d <= 0 && $today_now->diff($end_date)->d >= 0) {
-          echo "IS in range\n";
           //'deep' merge
           if (!isset($final_restrictions[$location])) {
             $final_restrictions[$location] = [$method => $restriction_method];
