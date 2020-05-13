@@ -144,6 +144,123 @@ return str_replace('#cfw-shipping-method', '#hsh-cfw-shipping-method', $html);
 });*/
 
 /**
+ * Merge default restrictions with date based restrictions
+ * must parse first!
+ */
+function merge_date_restrictions_with_defaults($defaults, $restrictions) {
+  $today_now = new \DateTime();
+
+  $final_restrictions = $defaults;
+
+  foreach ($restrictions as $location => $restriction) {
+    foreach ($restriction as $method => $restriction_method) {
+      $date = \DateTime::createFromFormat('Y-m-d', $restriction_method['date']);
+
+      if (!$date) {
+        continue;
+      }
+
+      $date->setTime(0, 0, 0);
+      $end_date = !empty($restriction_method['end_date']) ? \DateTime::createFromFormat('Y-m-d', $restriction_method['end_date']) : null;
+      if (!$end_date) {
+        if ($today_now->diff($date)->d === 0) {
+          //'deep' merge
+          if (!isset($final_restrictions[$location])) {
+            $final_restrictions[$location] = [$method => $restriction_method];
+          } else {
+            $final_restrictions[$location][$method] = $restriction_method;
+          }
+        }
+      } else {
+        $end_date->setTime(0, 0, 0);
+        if ($today_now->diff($date)->d <= 0 && $today_now->diff($end_date)->d >= 0) {
+          echo "IS in range\n";
+          //'deep' merge
+          if (!isset($final_restrictions[$location])) {
+            $final_restrictions[$location] = [$method => $restriction_method];
+          } else {
+            $final_restrictions[$location][$method] = $restriction_method;
+          }
+        }
+      }
+    }
+
+    //$date_diff = date_diff()
+  }
+
+  return $final_restrictions;
+}
+
+function find_location_by_id($location_id, $location_terms) {
+  foreach ($location_terms as $location_term) {
+    if ($location_term->term_id === $location_id) {
+      return $location_term;
+    }
+  }
+  return null;
+}
+
+/**
+ * Take an array of restrictions, and turn them into an object by store
+ * [0]=>locations['x','y','z'] ==> {x:..., y:..., z:...}
+ */
+function parse_date_restriction_defaults($restrictions) {
+
+  $byLocation = []; //Assoc array of restrictions by location. Order in the input array matters.
+
+  //get all the terms here once.
+  // we can be pretty confident there will only be a small number
+  $location_terms = get_terms(array('taxonomy' => 'location', 'hide_empty' => false));
+  foreach ($restrictions as $restriction) {
+    foreach ($restriction['location'] as $location_id) {
+      $location_term = find_location_by_id($location_id, $location_terms);
+      if (!$location_term) {
+        continue;
+      }
+
+      $byLocation[$location_term->slug] = [];
+      foreach ($restriction['method'] as $restriction_method) {
+        $byLocation[$location_term->slug][$restriction_method] = [
+          'day_offset' => $restriction['day_offset'],
+          'time_cutoff' => $restriction['time_cutoff'],
+          'type' => isset($restriction['type']) ? $restriction['type'] : 'default',
+          'date' => isset($restriction['date']) ? $restriction['date'] : null,
+          'end_date' => isset($restriction['end_date']) ? $restriction['end_date'] : null,
+        ];
+      }
+    }
+  }
+
+  return $byLocation;
+}
+
+function parse_date_restrictions($restrictions) {
+  $location_terms = get_terms(array('taxonomy' => 'location', 'hide_empty' => false));
+  foreach ($restrictions as &$restriction) {
+    $locations = [];
+    foreach ($restriction['location'] as $location_id) {
+      $location_term = find_location_by_id($location_id, $location_terms);
+      if ($location_term) {
+        $locations[] = $location_term->slug;
+      }
+    }
+    $restriction['location'] = $locations;
+  }
+  return $restrictions;
+}
+
+function get_checkout_date_restrictions() {
+  $defaults = get_field('order_date_defaults', 'options');
+  $restrictions = get_field('order_date_restrictions', 'options');
+
+  $defaults = parse_date_restriction_defaults($defaults);
+  $defaults = merge_date_restrictions_with_defaults($defaults, parse_date_restriction_defaults($restrictions));
+
+  $restrictions = parse_date_restrictions($restrictions);
+  return ['defaults' => $defaults, 'restrictions' => $restrictions];
+}
+
+/**
  * Add some scripts/styles
  * For some reason it doesn't work here: 'cfw_load_template_assets'
  */
@@ -156,7 +273,7 @@ add_action('wp_footer', function () {
   }
 
   if (class_exists('\WC_OrderByLocation')) {
-    $data = array('cookie_name' => \WC_OrderByLocation::$location_var_name);
+    $data = array('cookie_name' => \WC_OrderByLocation::$location_var_name, 'date_restrictions' => get_checkout_date_restrictions());
     echo "<script>\n/* <![CDATA[ */\n";
     echo 'var custom_checkout_data = ' . json_encode($data);
     echo "\n/* ]]> */\n</script>";

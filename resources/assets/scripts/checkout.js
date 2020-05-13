@@ -7,6 +7,12 @@ import {
   startOfTomorrow,
   isBefore,
   startOfDay,
+  parse,
+  isEqual,
+  isSameDay,
+  endOfYesterday,
+  endOfToday,
+  endOfDay,
 } from "date-fns";
 
 const data = window.custom_checkout_data;
@@ -14,13 +20,7 @@ const Cookies = window.Cookies;
 
 const cookieName = data.cookie_name;
 
-const cookieData = (() => {
-  try {
-    return JSON.parse(Cookies.get(cookieName));
-  } catch (e) {
-    return null;
-  }
-})();
+const cookieData = getCookieData();
 
 //console.log("cookiedata", cookieData);
 
@@ -41,26 +41,104 @@ ready(() => {
   });*/
 
   //Restrict date picker options
-  const datePicker = document.querySelector("#date.checkout-date-picker");
-  if (datePicker) {
-    //datePicker.datepicker('option','minDate')
-    const cutoffTime = add(startOfToday(), { hours: 15 }); //11am today
-    const isAfterCutoff = isAfter(new Date(), cutoffTime);
+  restrictDatePicker();
+  //$("#date.date-picker").datepicker("option", "minDate", new Date(2007, 1 - 1, 1));
+});
 
-    let minDate = startOfDay(new Date(2020, 4, 11));
-    if (cookieData.location === "devonport") {
-      minDate = startOfDay(new Date(2020, 4, 13));
+function restrictDatePicker() {
+  const datePicker = document.querySelector("#date.checkout-date-picker");
+  if (!datePicker) return;
+
+  //The min date is today
+  let minDate = startOfToday();
+  let cutoffTime = null;
+
+  //Get cookie data
+  const location = cookieData.location;
+  const method = cookieData.method;
+  if (!location || !method) return;
+
+  //Get the default for the location&method
+  const defaultSetting =
+    data.date_restrictions.defaults[location] &&
+    data.date_restrictions.defaults[location][method]
+      ? data.date_restrictions.defaults[location][method]
+      : null;
+
+  if (defaultSetting) {
+    minDate = add(startOfToday(), { days: +defaultSetting.day_offset });
+    if (defaultSetting.time_cutoff) {
+      let cutoffTimeParts = defaultSetting.time_cutoff.split(":");
+      let timeOffset = {};
+      if (typeof cutoffTimeParts[0] !== "undefined")
+        timeOffset.hours = cutoffTimeParts[0];
+      if (typeof cutoffTimeParts[1] !== "undefined")
+        timeOffset.minutes = cutoffTimeParts[1];
+      cutoffTime = add(startOfToday(), timeOffset);
     }
-    /*
-    if (isAfterCutoff) {
-      minDate = add(minDate, { days: 1 });
-    }*/
-    $(datePicker).datepicker("option", "minDate", minDate);
-    //$(datePicker).datepicker("option", "defaultDate", 1);
-    /*$(datePicker).datepicker("option", "beforeShowDay", (date) => {
+  }
+
+  //If there is a cutoff time, and it has passed
+  if (cutoffTime && isAfter(new Date(), cutoffTime)) {
+    minDate = add(minDate, { days: 1 });
+  }
+
+  //Set the mindate
+  $(datePicker).datepicker("option", "minDate", minDate);
+
+  //$(datePicker).datepicker("option", "defaultDate", 1);
+  /*$(datePicker).datepicker("option", "beforeShowDay", (date) => {
       if (isBefore(date, minDate)) return [false];
       return [true];
     });*/
+
+  //Is between, not inclusive of end date
+  const isBetween = (testDate, startDate, endDate) => {
+    return (
+      isBefore(startDate, endOfDay(testDate)) &&
+      isAfter(endDate, startOfDay(testDate))
+    );
+  };
+
+  $(datePicker).datepicker("option", "beforeShowDay", (showDate) => {
+    let isEnabled = true;
+    data.date_restrictions.restrictions.forEach((restriction) => {
+      // if (restriction.type !== "disable") return;
+      //If the restriction is not for the current method, we don't care
+      if (restriction.location.indexOf(method) === -1) return;
+      if (restriction.method.indexOf(method) === -1) return;
+
+      const date = startOfDay(
+        parse(restriction.date, "yyyy-MM-dd", new Date())
+      );
+      const end_date = restriction.end_date
+        ? startOfDay(parse(restriction.end_date, "yyyy-MM-dd", new Date()))
+        : null;
+
+      if (end_date && !isBefore(date, end_date)) return;
+
+      //If showDate is the same as date, or if it's a range, is within range (inclusive)
+      const shouldApplyRestriction =
+        isSameDay(showDate, date) ||
+        (end_date &&
+          (isBetween(showDate, date, end_date) ||
+            isSameDay(end_date, showDate)));
+
+      if (!shouldApplyRestriction) return;
+
+      if (restriction.type === "disable") {
+        isEnabled = false;
+        return;
+      }
+    });
+    return [isEnabled];
+  });
+}
+
+function getCookieData() {
+  try {
+    return JSON.parse(Cookies.get(cookieName));
+  } catch (e) {
+    return null;
   }
-  //$("#date.date-picker").datepicker("option", "minDate", new Date(2007, 1 - 1, 1));
-});
+}
