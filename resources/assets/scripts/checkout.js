@@ -100,39 +100,41 @@ function restrictDatePicker() {
     );
   };
 
-  $(datePicker).datepicker("option", "beforeShowDay", (showDate) => {
-    let isEnabled = true;
-    data.date_restrictions.restrictions.forEach((restriction) => {
-      // if (restriction.type !== "disable") return;
-      //If the restriction is not for the current method, we don't care
-      if (restriction.location.indexOf(method) === -1) return;
-      if (restriction.method.indexOf(method) === -1) return;
+  if (data.date_restrictions.length) {
+    $(datePicker).datepicker("option", "beforeShowDay", (showDate) => {
+      let isEnabled = true;
+      data.date_restrictions.restrictions.forEach((restriction) => {
+        // if (restriction.type !== "disable") return;
+        //If the restriction is not for the current method, we don't care
+        if (restriction.location.indexOf(method) === -1) return;
+        if (restriction.method.indexOf(method) === -1) return;
 
-      const date = startOfDay(
-        parse(restriction.date, "yyyy-MM-dd", new Date())
-      );
-      const end_date = restriction.end_date
-        ? startOfDay(parse(restriction.end_date, "yyyy-MM-dd", new Date()))
-        : null;
+        const date = startOfDay(
+          parse(restriction.date, "yyyy-MM-dd", new Date())
+        );
+        const end_date = restriction.end_date
+          ? startOfDay(parse(restriction.end_date, "yyyy-MM-dd", new Date()))
+          : null;
 
-      if (end_date && !isBefore(date, end_date)) return;
+        if (end_date && !isBefore(date, end_date)) return;
 
-      //If showDate is the same as date, or if it's a range, is within range (inclusive)
-      const shouldApplyRestriction =
-        isSameDay(showDate, date) ||
-        (end_date &&
-          (isBetween(showDate, date, end_date) ||
-            isSameDay(end_date, showDate)));
+        //If showDate is the same as date, or if it's a range, is within range (inclusive)
+        const shouldApplyRestriction =
+          isSameDay(showDate, date) ||
+          (end_date &&
+            (isBetween(showDate, date, end_date) ||
+              isSameDay(end_date, showDate)));
 
-      if (!shouldApplyRestriction) return;
+        if (!shouldApplyRestriction) return;
 
-      if (restriction.type === "disable") {
-        isEnabled = false;
-        return;
-      }
+        if (restriction.type === "disable") {
+          isEnabled = false;
+          return;
+        }
+      });
+      return [isEnabled];
     });
-    return [isEnabled];
-  });
+  }
 }
 
 function getCookieData() {
