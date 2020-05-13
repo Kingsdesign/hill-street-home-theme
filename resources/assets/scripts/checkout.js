@@ -100,7 +100,7 @@ function restrictDatePicker() {
     );
   };
 
-  if (data.date_restrictions.length) {
+  if (data.date_restrictions.restrictions.length) {
     $(datePicker).datepicker("option", "beforeShowDay", (showDate) => {
       let isEnabled = true;
       data.date_restrictions.restrictions.forEach((restriction) => {
