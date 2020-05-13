@@ -106,7 +106,8 @@ function restrictDatePicker() {
       data.date_restrictions.restrictions.forEach((restriction) => {
         // if (restriction.type !== "disable") return;
         //If the restriction is not for the current method, we don't care
-        if (restriction.location.indexOf(method) === -1) return;
+
+        if (restriction.location.indexOf(location) === -1) return;
         if (restriction.method.indexOf(method) === -1) return;
 
         const date = startOfDay(
