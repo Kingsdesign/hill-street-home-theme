@@ -223,7 +223,7 @@ function variable_product_price_html($v_price, $v_product) {
 /**
  * Hide SKU
  */
-add_filter('wc_product_sku_enabled', '__return_false');
+//add_filter('wc_product_sku_enabled', '__return_false');
 
 /**
  * Wrap main image on single product to match thumbnails
