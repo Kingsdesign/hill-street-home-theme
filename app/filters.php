@@ -216,9 +216,23 @@ function ajax_postcode_search() {
     wp_send_json_error(array('message' => 'Missing query'), 400);
     wp_die();
   }
-  $resp = wp_remote_get('https://auspost.com.au/api/postcode/search.txt?key=63fa7c3657ea97f3809aacaa42142bae&q=' . $q . '&limit=10', array(
+  /*$api_key = '63fa7c3657ea97f3809aacaa42142bae';
+  $resp = wp_remote_get('https://auspost.com.au/api/postcode/search.txt?key=' . $api_key . '&q=' . $q . '&limit=10', array(
 
+  ));*/
+  $api_key = 'e6b27996-be38-424e-9d66-14fddc860c34';
+  $api_url = 'https://digitalapi.auspost.com.au/postcode/search.txt?';
+  $query = implode('&', ['q=' . urlencode($q), 'limit=10']);
+  $resp = wp_remote_get($api_url . $query, array(
+    'headers' => [
+      'auth-key' => $api_key,
+    ],
   ));
+  if (is_wp_error($resp)) {
+    error_log('AusPost fetch failed');
+    wp_send_json_error(array('message' => 'Remote fetch failed'), 500);
+    wp_die();
+  }
   $rawSuburbs = explode("\n", trim($resp['body']));
   $suburbs = [];
   foreach ($rawSuburbs as $rawSuburb) {

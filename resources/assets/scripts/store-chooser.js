@@ -288,55 +288,78 @@ function onShowModal(modal) {
     //sideEffects.suburb("",lo)
   }
 
+  const fetchData = () => {
+    const value = document.querySelector("#autoComplete").value;
+    if (!value) {
+      //console.log("NO VALUE!");
+      return [];
+    }
+    if (value.length < 3) return [];
+
+    return fetch(data.ajax_url, {
+      method: "POST",
+      credentials: "include", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+      },
+      body: "action=postcode_search&q=" + value,
+    })
+      .then((r) => {
+        if (r.ok) return r;
+        console.error(`AusPost fetch failed`);
+        throw new Error(r.statusText);
+      })
+      .then((r) => r.json())
+      .then((resp) => {
+        console.log(resp);
+        if (!resp) {
+          //console.log("NO RESPONSE!");
+          return [];
+        }
+        return resp;
+      });
+  };
+
+  function fetchSuburbs() {
+    let resolve, reject, cancelled;
+    const promise = new Promise((resolveFromPromise, rejectFromPromise) => {
+      resolve = resolveFromPromise;
+      reject = rejectFromPromise;
+    });
+
+    Promise.resolve()
+      .then(wrapWithCancel(fetchData))
+      .then(resolve)
+      .then(reject);
+
+    return {
+      promise,
+      cancel: () => {
+        cancelled = true;
+        reject({ reason: "cancelled" });
+      },
+    };
+
+    function wrapWithCancel(fn) {
+      return (data) => {
+        if (!cancelled) {
+          return fn(data);
+        }
+      };
+    }
+  }
+
+  let promise, cancel;
+
   new autoComplete({
     data: {
       // Data src [Array, Function, Async] | (REQUIRED)
       src: () => {
-        const value = document.querySelector("#autoComplete").value;
-        if (!value) {
-          //console.log("NO VALUE!");
-          return [];
-        }
-        if (value.length < 3) return [];
-
-        return fetch(data.ajax_url, {
-          method: "POST",
-          credentials: "include", // include, *same-origin, omit
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-          },
-          body: "action=postcode_search&q=" + value,
-        })
-          .then((r) => {
-            if (r.ok) return r;
-            throw new Error(r.statusText);
-          })
-          .then((r) => r.json())
-          .then((resp) => {
-            console.log(resp);
-            if (!resp) {
-              //console.log("NO RESPONSE!");
-              return [];
-            }
-            //console.log("resp", resp);
-            /*const lines = resp.trim().split("\n");
-            const suburbs = lines
-              .map((line) => {
-                if (!line) return false;
-                const lineParts = line.split("|");
-                if (lineParts.length < 4) return false;
-                return {
-                  name: lineParts[2],
-                  suburb: lineParts[2],
-                  postcode: lineParts[1],
-                  state: lineParts[3],
-                };
-              })
-              .filter((s) => !!s);
-            //console.log("Suburbs", suburbs);
-            return suburbs;*/
-            return resp;
-          });
+        if (cancel) cancel();
+        const f = fetchSuburbs();
+        promise = f.promise;
+        cancel = f.cancel;
+        return promise;
       },
       key: ["name", "postcode"],
       cache: false,
