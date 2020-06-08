@@ -53,7 +53,7 @@ export default {
     // replace 'demo' with your cloud name in the line above
     cl.responsive();
 
-    barba.init({
+    /*barba.init({
       prevent: (args) => {
         if (args.href.match(/\/checkout\/?$/)) return true;
         if (args.el.classList.contains("ajax_add_to_cart")) return true;
@@ -67,7 +67,7 @@ export default {
         return false;
       },
       cacheIgnore: ["/cart/"],
-    });
+    });*/
     barba.hooks.afterEnter((data) => {
       if (document.body.classList.contains("barba-transitioned")) {
         document.body.classList.add("barba-transitioned");
