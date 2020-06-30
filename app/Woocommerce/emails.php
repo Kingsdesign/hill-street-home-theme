@@ -160,6 +160,7 @@ function conditional_email_recipient($recipient, $order) {
   return $recipient;
 }
 add_filter('woocommerce_email_recipient_new_order', __NAMESPACE__ . '\\conditional_email_recipient', 10, 2);
+add_filter('woocommerce_email_recipient_failed_order', __NAMESPACE__ . '\\conditional_email_recipient', 10, 2);
 
 /**
  * Remove styles from admin emails
