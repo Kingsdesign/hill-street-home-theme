@@ -58,7 +58,18 @@
           @endif
         </div>
         <div class="px-2 w-full md:w-1/4 lg:w-1/5 text-center md:text-right">
-          <a href="{{ App::relative_url(wc_get_cart_url()) }}">Cart @svg(MdShoppingCartOutline)</a>
+          <a href="{{ App::relative_url(wc_get_cart_url()) }}">
+            Cart
+            @svg(MdShoppingCartOutline)
+            @php
+            global $woocommerce;
+            $count= $woocommerce->cart->cart_contents_count;
+            $count_string =sprintf( _n( '(%d item)', '(%d items)', $count, 'hillsthome' ), $count );
+            @endphp
+            @if($count>0)
+            <span class="cart-count text-orange-500">{{$count_string}}</span>
+            @endif
+          </a>
         </div>
       </div>
     </nav>
