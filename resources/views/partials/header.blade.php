@@ -67,7 +67,7 @@
             $count_string =sprintf( _n( '(%d item)', '(%d items)', $count, 'hillsthome' ), $count );
             @endphp
             @if($count>0)
-            <span class="cart-count text-orange-500">{{$count_string}}</span>
+            <span class="cart-count text-blue-500 text-sm">{{$count_string}}</span>
             @endif
           </a>
         </div>
