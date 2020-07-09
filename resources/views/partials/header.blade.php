@@ -61,14 +61,7 @@
           <a href="{{ App::relative_url(wc_get_cart_url()) }}">
             Cart
             @svg(MdShoppingCartOutline)
-            @php
-            global $woocommerce;
-            $count= $woocommerce->cart->cart_contents_count;
-            $count_string =sprintf( _n( '(%d item)', '(%d items)', $count, 'hillsthome' ), $count );
-            @endphp
-            @if($count>0)
-            <span class="cart-count text-blue-500 text-sm">{{$count_string}}</span>
-            @endif
+            <span id="header-cart-indicator"></span>
           </a>
         </div>
       </div>

@@ -259,3 +259,20 @@ function ajax_postcode_search() {
  * Remove scripts/styles from order-by-location
  */
 add_filter('wc_obl/enqueue_frontend', '__return_false');
+
+/**
+ * Get cart count
+ */
+add_action('wp_ajax_cart_count', __NAMESPACE__ . '\\ajax_cart_count');
+add_action('wp_ajax_nopriv_cart_count', __NAMESPACE__ . '\\ajax_cart_count');
+function ajax_cart_count() {
+  global $woocommerce;
+  $count = $woocommerce->cart->cart_contents_count;
+  $count_string = sprintf(_n('(%d item)', '(%d items)', $count, 'hillsthome'), $count);
+  $html = null;
+  if ($count > 0) {
+    $html = '<span class="cart-count text-blue-500 text-sm">' . $count_string . '</span>';
+  }
+  wp_send_json(['html' => $html]);
+  exit;
+}

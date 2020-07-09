@@ -164,8 +164,35 @@ export default {
       isOpen = false;
       isOpenSideEffect();
     });
+
+    //Get cart count
+    setTimeout(() => getCartCount(), 1000);
   },
 };
+
+function getCartCount() {
+  const data = window.main_data;
+  const cartIndicator = document.getElementById("header-cart-indicator");
+  if (!cartIndicator) return;
+  return fetch(data.ajax_url, {
+    method: "POST",
+    credentials: "include", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+    },
+    body: "action=cart_count",
+  })
+    .then((r) => {
+      if (r.ok) return r;
+      console.error(`Cart count fetch failed`);
+      throw new Error(r.statusText);
+    })
+    .then((r) => r.json())
+    .then((resp) => {
+      if (!resp || !resp.html) return;
+      cartIndicator.innerHTML = resp.html;
+    });
+}
 
 function diffAssets(
   currentAssets,
