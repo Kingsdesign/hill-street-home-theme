@@ -146,7 +146,6 @@ function restrictDatePicker() {
         +cookieData.postcode !== 7310 &&
         isSunday(showDate)
       ) {
-        console.log("NO DELIVERY FOR DEVONPORT ON SUNDAY YO EXCEPT TO 7310");
         isEnabled = false;
       }
 
