@@ -486,6 +486,16 @@ $long_class = ' shipping-details-label-long';
 }, 0);*/
 
 /**
+ * Maybe remove pickup time
+ */
+add_filter('woocommerce_checkout_fields', function ($fields) {
+  if (!sc_method_is('pickup')) {
+    unset($fields['order']['time']);
+  }
+  return $fields;
+}, 1001, 1);
+
+/**
  * Maybe remove DOB field & rewards checkbox
  * if not alcohol
  */
