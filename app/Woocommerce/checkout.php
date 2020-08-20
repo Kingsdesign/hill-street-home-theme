@@ -492,6 +492,9 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
   if (!sc_method_is('pickup')) {
     unset($fields['order']['time']);
   }
+  if (isset($fields['order']['card_message'])) {
+    $fields['order']['card_message']['maxlength'] = 100;
+  }
   return $fields;
 }, 1001, 1);
 

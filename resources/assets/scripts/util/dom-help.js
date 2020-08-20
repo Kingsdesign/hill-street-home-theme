@@ -1,5 +1,10 @@
-export function addEventListener(eventName, elementSelector, handler) {
-  document.addEventListener(
+export function addEventListener(
+  eventName,
+  elementSelector,
+  handler,
+  context = document
+) {
+  context.addEventListener(
     eventName,
     function (e) {
       // loop parent nodes from the target to the delegation node

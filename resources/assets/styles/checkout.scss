@@ -2,7 +2,6 @@
 
 @import "components/buttons";
 
-
 .sc-data-display {
   @apply border border-solid border-gray-300 p-4 text-xl text-center bg-gray-50 mb-6;
 }
@@ -90,3 +89,30 @@
   }
 }
 */
+
+#time_field {
+  width: 100%;
+
+  legend {
+    @apply mb-2;
+  }
+
+  label {
+    display: block;
+    @apply border border-solid px-4 py-2 rounded-md my-2;
+    border-color: #d9d9d9;
+  }
+
+  @apply pb-4;
+}
+
+.card-message-maxlength {
+  color: #718096;
+  font-size: 0.85rem;
+  margin-left: 1rem;
+  margin-top: 0.25rem;
+
+  &.card-message-maxlength--invalid {
+    color: #e53e3e;
+  }
+}

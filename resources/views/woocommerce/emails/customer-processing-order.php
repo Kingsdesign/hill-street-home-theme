@@ -29,7 +29,30 @@ do_action('woocommerce_email_header', $email_heading, $email);?>
 <?php /* translators: %s: Order number */?>
 <?php /**
  * REMOVED THIS LINE
+ * ADDED below
  */?>
+ <p><strong>Order number: <?php echo esc_html($order->get_order_number()); ?></strong></p>
+
+ <?php
+$location = $order->get_meta('_stock_location');
+$suburb = $order->get_meta('_order_sc_suburb');
+
+//add fulfilment date/time/method to email
+$fulfil_method = $order->get_meta('_order_sc_method');
+$fulfil_date = $order->get_meta('date');
+$fulfil_date = $fulfil_date ? DateTime::createFromFormat('M j, Y', $fulfil_date) : false;
+$fulfil_date_fmt = $fulfil_date ? $fulfil_date->format('F j, Y') : "";
+$fulfil_time = $order->get_meta('time');
+$fulfil_location = $fulfil_method === 'pickup' ? \ucwords(strtolower(implode(" ", explode("-", $location)))) : ucwords(strtolower($suburb));
+
+$fulfil_parts = [];
+$fulfil_parts[] = $fulfil_method === 'pickup' ? 'from' : 'to';
+$fulfil_parts[] = $fulfil_location;
+$fulfil_parts[] = '-';
+$fulfil_parts[] = $fulfil_time ? $fulfil_time : '';
+$fulfil_parts[] = $fulfil_date;
+?>
+ <p><strong><?php echo ucfirst($fulfil_method); ?>:</strong> <?php echo implode(" ", $fulfil_parts); ?> </p>
 
 <?php
 

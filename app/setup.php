@@ -17,6 +17,7 @@ add_action('wp_enqueue_scripts', function () {
   $main_data = ['ajax_url' => admin_url('admin-ajax.php')];
   if (is_product()) {
     $main_data['single_product'] = [
+      //alcohol
       'hide_addons' => (has_term('edible', 'product_cat', $post) || has_term('fresh', 'product_cat', $post)) && get_post_field('slug', $post) !== 'gift-card',
       'product_id' => $post->ID,
     ];

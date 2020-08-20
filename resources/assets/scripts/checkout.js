@@ -48,7 +48,48 @@ ready(() => {
   //$("#date.date-picker").datepicker("option", "minDate", new Date(2007, 1 - 1, 1));
 
   initValidateDate();
+
+  initCardMessage();
 });
+
+function initCardMessage() {
+  const cardMessageField = document.getElementById("card_message_field");
+  if (!cardMessageField) return;
+
+  const cardMessageInput = cardMessageField.querySelector("#card_message");
+  if (!cardMessageInput) return;
+
+  const maxlength = +cardMessageInput.getAttribute("maxlength");
+  console.log({ maxlength });
+  if (!maxlength) return;
+
+  const cardMessageDisplay = document.createElement("div");
+  cardMessageDisplay.className = "card-message-maxlength";
+  const cardMessageDisplayText = (length) =>
+    `${length}/${maxlength} characters`;
+
+  const doValidation = () => {
+    const length = cardMessageInput.value.length;
+    cardMessageDisplay.innerHTML = cardMessageDisplayText(length);
+
+    if (length === maxlength) {
+      cardMessageDisplay.classList.add("card-message-maxlength--invalid");
+    } else if (
+      cardMessageDisplay.classList.contains("card-message-maxlength--invalid")
+    ) {
+      cardMessageDisplay.classList.remove("card-message-maxlength--invalid");
+    }
+  };
+
+  const handleKeyup = () => {
+    doValidation();
+  };
+
+  cardMessageField.appendChild(cardMessageDisplay);
+  doValidation();
+
+  cardMessageInput.addEventListener("keyup", handleKeyup);
+}
 
 function restrictDatePicker() {
   const datePicker = document.querySelector("#date.checkout-date-picker");
