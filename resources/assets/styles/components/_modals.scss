@@ -46,7 +46,7 @@
   }
 
   .modal-content {
-    @apply relative bg-white border-solid border-4 border-gray-300 w-full max-w-xl overflow-y-scroll;
+    @apply relative bg-white border-solid border-4 border-gray-300 w-full max-w-xl;
     max-height: 100%;
   }
 

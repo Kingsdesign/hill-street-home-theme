@@ -13,7 +13,7 @@ import { addEventListener } from "../util/dom-help";
 
 import { trigger } from "../util/dom-help";
 
-//import modalConfig from "../util/modalConfig";
+//DO NOT REMOVE THIS IMPORT - it is used
 import ModalService from "../services/modalService";
 
 /*export default {
@@ -49,9 +49,9 @@ export default {
 
     observer.observe();
 
-    var cl = cloudinary.Cloudinary.new({ cloud_name: "hshome" });
+    //var cl = cloudinary.Cloudinary.new({ cloud_name: "hshome" });
     // replace 'demo' with your cloud name in the line above
-    cl.responsive();
+    //cl.responsive();
 
     barba.init({
       timeout: 10000,
@@ -95,10 +95,12 @@ export default {
         singleProduct,
         archive,
       });
-      routes.loadEvents();
-      cl.responsive();
+      setTimeout(() => {
+        routes.loadEvents();
 
-      trigger("hsh-fe::after_enter", document);
+        trigger("hsh-fe::after_enter", document);
+      });
+      //cl.responsive();
     });
     barba.hooks.beforeLeave((data) => {
       routes.unloadEvents();
@@ -108,15 +110,15 @@ export default {
       // Set <body> classes for "next" page
       var nextHtml = data.next.html;
 
-      replaceAssets(nextHtml);
+      // var response = nextHtml.replace(
+      //   /(<\/?)body( .+?)?>/gi,
+      //   "$1notbody$2>",
+      //   nextHtml
+      // );
+      // var bodyClasses = $(response).filter("notbody").attr("class");
+      // $("body").attr("class", bodyClasses + " barba-transitioned");
 
-      var response = nextHtml.replace(
-        /(<\/?)body( .+?)?>/gi,
-        "$1notbody$2>",
-        nextHtml
-      );
-      var bodyClasses = $(response).filter("notbody").attr("class");
-      $("body").attr("class", bodyClasses + " barba-transitioned");
+      replaceAssets(nextHtml);
 
       trigger("hsh-fe::after_leave", document);
 
@@ -228,233 +230,187 @@ function diffAssets(
   };
 }
 
+/**
+ * Get all assets ( scripts and styles ) from a DOM
+ * retain order within scripts/styles
+ * @param {} context
+ */
 function getAssetsFromDOM(context) {
-  const scripts = {
-    inline: context.querySelectorAll("script:not([src])"),
-    linked: context.querySelectorAll("script[src]"),
-  };
-  const styles = {
-    inline: context.querySelectorAll("style"),
-    linked: context.querySelectorAll('link[rel="stylesheet"]'),
-  };
+  const scripts = context.querySelectorAll("script");
+
+  const styles = context.querySelectorAll('style, link[rel="stylesheet"]');
+
   return { scripts, styles };
 }
 
+//Super cheap css-in-js
+function setStyle(el, style) {
+  Object.keys(style).forEach((key) => {
+    el.style[key] = style[key];
+  });
+}
+
+function addOverlay() {
+  const overlay = document.createElement("div");
+  setStyle(overlay, {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    background: "#fff",
+    zIndex: 10000,
+    opacity: 1,
+    transition: "0.2s opacity ease-out",
+  });
+  overlay.id = "transition-overlay";
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+function showOverlay() {
+  let overlay = document.getElementById("transition-overlay");
+  if (!overlay) {
+    overlay = addOverlay();
+  } else {
+    overlay.style.opacity = 1;
+    overlay.style.display = "block";
+  }
+  return overlay;
+}
+
+function hideOverlay() {
+  let overlay = document.getElementById("transition-overlay");
+  if (overlay) {
+    overlay.style.opacity = 0;
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 200);
+  }
+}
+
 function replaceAssets(html) {
-  var tempDOM = document.createElement("div");
-  tempDOM.innerHTML = html;
-
-  const d = document;
-  const body = d.body;
-  const head = d.getElementsByTagName("head")[0];
-
-  const newAssets = getAssetsFromDOM(tempDOM);
-  const currentAssets = getAssetsFromDOM(document);
-
-  //----
-  // Styles
-  const stylesDiff = diffAssets(
-    Array.from(currentAssets.styles.linked),
-    Array.from(newAssets.styles.linked),
-    (a, b) => {
-      return a.href === b.href;
-    }
-  );
-  const inlineStylesDiff = diffAssets(
-    Array.from(currentAssets.styles.inline),
-    Array.from(newAssets.styles.inline),
-    (a, b) => {
-      return a.id && b.id && a.id === b.id;
-    }
-  );
-
-  //Add & removed linked styles
-  stylesDiff.removed.forEach((asset) => {
-    asset.remove();
-  });
-  stylesDiff.added.forEach((asset) => {
-    const s = document.createElement("link");
-    s.rel = "stylesheet";
-    if (asset.id) s.id = asset.id;
-
-    s.href = asset.href;
-    head.appendChild(s);
-  });
-
-  //Add & remove inline styles
-  ////TODO this is dev only
-  inlineStylesDiff.removed.forEach((asset) => {
-    asset.remove();
-  });
-  inlineStylesDiff.added.forEach((asset) => {
-    const s = document.createElement("style");
-    if (asset.type) s.type = asset.type;
-    if (asset.id) s.id = asset.id;
-
-    s.innerHTML = asset.innerHTML;
-    head.appendChild(s);
-  });
-
-  const alwaysReloadScripts = [
-    //"/plugins/woocommerce/assets/js/frontend/single-product.js",
-    //"/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
-    //"/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.js",
-    //"/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
-    //"/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
-    //"/plugins/woocommerce/assets/js/frontend/add-to-cart-variation.js",
-
-    //
-    //"/themes/hillsthome/jquery-3.5.0.min.js",
-    //"/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.js",
-    /*"/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
-    "/plugins/woocommerce/assets/js/frontend/single-product.js",
-    //"/plugins/woocommerce/assets/js/js-cookie/js.cookie.js",
-    "/plugins/woocommerce/assets/js/frontend/woocommerce.js",
-    "/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
-    //"/plugins/woocommerce/assets/js/jquery-tiptip/jquery.tipTip.min.js",
-    "/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
-    "/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
-    //"/wp-includes/js/underscore.min.js",
-    //"/wp-includes/js/wp-util.js",
-    "/wp-content/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
-    //"/wp-content/themes/hillsthome/dist/scripts/main.js",
-    //"/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
-    //"/wp-content/plugins/woocommerce/assets/js/accounting/accounting.js",
-    "/wp-content/plugins/woocommerce-product-addons/assets/js/addons.js",*/
-
-    //"/wp-content/t/themes/hillsthome/jquery-3.5.0.min.js",
-    "/wp-content/plugins/woocommerce/assets/js/frontend/add-to-cart.js",
-    //"/wp-content/plugins/woocommerce/assets/js/jquery-blockui/jquery.blockUI.js",
-    "/wp-content/plugins/woocommerce/assets/js/frontend/single-product.js",
-    //"/wp-content/plugins/woocommerce/assets/js/js-cookie/js.cookie.js",
-    "/wp-content/plugins/woocommerce/assets/js/frontend/woocommerce.js",
-    "/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.js",
-    "/wp-content/plugins/woocommerce/assets/js/jquery-tiptip/jquery.tipTip.min.js",
-    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-form-move-tracker.js",
-    "/wp-content/plugins/duracelltomi-google-tag-manager/js/gtm4wp-woocommerce-enhanced.js",
-    //"/wp-includes/js/underscore.min.js",
-    //"/wp-includes/js/wp-util.js",
-    "/wp-content/plugins/woo-product-variation-swatches/assets/js/rtwpvs.js",
-    //"/wp-content/themes/hillsthome/dist/scripts/main.js",
-    //"/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
-    "/wp-content/plugins/woocommerce/assets/js/frontend/add-to-cart-variation.js",
-    "/wp-content/plugins/woocommerce/assets/js/accounting/accounting.js",
-    "/wp-content/plugins/woocommerce-product-addons/assets/js/addons.js",
-  ];
-
-  const assetInList = (src, array) => {
-    return (
-      array.findIndex((item) => src.substr(item.length * -1) === item) !== -1
-    );
-  };
-
-  //-----
-  // Scripts
-  const scriptsDiff = diffAssets(
-    Array.from(currentAssets.scripts.linked),
-    Array.from(newAssets.scripts.linked),
-    (a, b) => {
-      return a.src === b.src;
-    },
-    { unchanged: true }
-  );
-
-  /*const inlineScriptsDiff = diffAssets(
-    Array.from(currentAssets.scripts.inline),
-    Array.from(newAssets.scripts.inline),
-    (a, b) => {
-      return a.id && b.id && a.id === b.id;
-    },
-    { unchanged: true }
-  );*/
-
-  //Add & remove inline scripts
-  //This seems to break some localisation stuff
-  /*inlineScriptsDiff.removed.forEach((asset) => {
-    asset.remove();
-  });*/
-  /*inlineScriptsDiff.added.forEach((asset) => {
-    const s = document.createElement("script");
-    if (asset.type) s.type = asset.type;
-    if (asset.id) s.id = asset.id;
-
-    s.innerHTML = asset.innerHTML;
-    body.appendChild(s);
-  });*/
-
-  //Remove and add ALL inline scripts
-  Array.from(currentAssets.scripts.inline).forEach((asset) => {
-    if (asset.id === "__bs_script__") return;
-    asset.remove();
-  });
-  Array.from(newAssets.scripts.inline).forEach((asset) => {
-    if (asset.id === "__bs_script__") return;
-    const s = document.createElement("script");
-    if (asset.type) s.type = asset.type;
-    if (asset.id) s.id = asset.id;
-
-    s.innerHTML = asset.innerHTML;
-    body.appendChild(s);
-  });
-
   const neverReloadScripts = [
     "/wp-content/themes/hillsthome/dist/scripts/main.js",
     "/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
   ];
+  const neverReloadStyles = [
+    "/wp-content/themes/hillsthome/dist/styles/main.css",
+    "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;1,400&display=swap",
+    "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap",
+  ];
 
-  //And all linked scripts
-  let mainScript;
-  Array.from(currentAssets.scripts.linked).forEach((asset) => {
-    if (assetInList(asset.src, neverReloadScripts)) {
-      mainScript = asset;
-      return;
-    }
-    asset.remove();
-  });
-  Array.from(newAssets.scripts.linked).forEach((asset) => {
-    if (assetInList(asset.src, neverReloadScripts)) return;
-    const s = document.createElement("script");
-    if (asset.type) s.type = asset.type;
-    if (asset.id) s.id = asset.id;
+  //showOverlay();
 
-    s.src = asset.src;
+  const doc = new DOMParser().parseFromString(html, "text/html");
 
-    //console.log("add", s.src);
-    if (mainScript) {
-      body.insertBefore(s, mainScript);
-    } else {
-      body.appendChild(s);
-    }
-  });
+  const head = document.getElementsByTagName("head")[0];
 
-  //Add & removed linked scripts
-  /*scriptsDiff.removed.forEach((asset) => {
-    asset.remove();
-  });
+  //Blanket replace head
+  //TODO use a scalpel instead
+  //const newHead = doc.getElementsByTagName("head")[0];
+  //head.innerHTML = newHead.innerHTML;
 
-  
-  //Reload always reload scripts
-  scriptsDiff.unchanged.forEach((asset) => {
-    if (assetInList(asset.src, neverReloadScripts)) return;
-    //if (asset.src && assetInList(asset.src, alwaysReloadScripts)) {
-    const s = document.createElement("script");
-    if (asset.type) s.type = asset.type;
-    if (asset.id) s.id = asset.id;
+  //Replace body classnames
+  const newBody = doc.getElementsByTagName("body")[0];
+  document.body.className = newBody.className;
 
-    s.src = asset.src;
+  //Add head assets
+  const newHeadAssets = getAssetsFromDOM(doc.getElementsByTagName("head")[0]);
+  Array.from(newHeadAssets.styles).forEach((assetEl) =>
+    insertStyle(assetEl, head, neverReloadStyles)
+  );
+  Array.from(newHeadAssets.scripts).forEach((assetEl) =>
+    insertScript(assetEl, head, neverReloadScripts)
+  );
 
-    asset.remove();
+  //Remove all head assets
+  const headAssets = getAssetsFromDOM(head);
+  Array.from(headAssets.scripts).forEach((assetEl) =>
+    removeAsset(assetEl, neverReloadScripts)
+  );
+  Array.from(headAssets.styles).forEach((assetEl) =>
+    removeAsset(assetEl, neverReloadStyles)
+  );
 
-    //console.log("add", s.src);
-    body.appendChild(s);
-    //}
-  });
-  scriptsDiff.added.forEach((asset) => {
-    const s = document.createElement("script");
-    if (asset.type) s.type = asset.type;
-    if (asset.id) s.id = asset.id;
+  //Remove all body assets
+  const bodyAssets = getAssetsFromDOM(document.body);
+  Array.from(bodyAssets.scripts).forEach((assetEl) =>
+    removeAsset(assetEl, neverReloadScripts)
+  );
+  Array.from(bodyAssets.styles).forEach((assetEl) => removeAsset(assetEl));
 
-    s.src = asset.src;
-    body.appendChild(s);
-  });*/
+  //Add new body assets
+  const newBodyAssets = getAssetsFromDOM(newBody);
+  Array.from(newBodyAssets.scripts).forEach((assetEl) =>
+    insertScript(assetEl, document.body, neverReloadScripts)
+  );
+  Array.from(newBodyAssets.styles).forEach((assetEl) =>
+    insertStyle(assetEl, document.body)
+  );
+
+  setTimeout(() => {
+    //Remove assets
+    // hideOverlay();
+  }, 300);
+}
+
+const assetInList = (src, array) => {
+  return (
+    array.findIndex((item) => src.substr(item.length * -1) === item) !== -1
+  );
+};
+
+const shouldSkipAsset = (assetEl, neverReload) => {
+  return (
+    (assetEl.tagName.toLowerCase() === "script" &&
+      assetEl.src &&
+      assetInList(assetEl.src, neverReload)) ||
+    assetEl.id === "__bs_script__" ||
+    (assetEl.tagName.toLowerCase() === "link" &&
+      assetEl.getAttribute("href") &&
+      assetInList(assetEl.getAttribute("href"), neverReload))
+  );
+};
+
+function removeAsset(assetEl, neverReload = []) {
+  if (shouldSkipAsset(assetEl, neverReload)) {
+    return;
+  }
+  assetEl.remove();
+}
+
+function insertStyle(assetEl, parent, neverReload = []) {
+  if (shouldSkipAsset(assetEl, neverReload)) {
+    return;
+  }
+
+  // const s = document.createElement(assetEl.tagName.toLowerCase());
+
+  // if (assetEl.type) s.type = assetEl.type;
+  // if (assetEl.id) s.id = assetEl.id;
+
+  // if (assetEl.getAttribute("href")) {
+  //   s.setAttribute("href", assetEl.getAttribute("href"));
+  // } else {
+  //   s.innerHTML = assetEl.innerHTML;
+  // }
+  parent.appendChild(assetEl);
+}
+
+function insertScript(assetEl, parent, neverReload = []) {
+  if (shouldSkipAsset(assetEl, neverReload)) {
+    return;
+  }
+
+  const s = document.createElement("script");
+  if (assetEl.type) s.type = assetEl.type;
+  if (assetEl.id) s.id = assetEl.id;
+
+  if (assetEl.src) {
+    s.src = assetEl.src;
+  } else {
+    s.innerHTML = assetEl.innerHTML;
+  }
+  parent.appendChild(s);
 }
