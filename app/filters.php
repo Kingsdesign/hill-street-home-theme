@@ -256,38 +256,49 @@ function ajax_postcode_search() {
     wp_send_json_error(array('message' => 'Missing query'), 400);
     wp_die();
   }
-  /*$api_key = '63fa7c3657ea97f3809aacaa42142bae';
-  $resp = wp_remote_get('https://auspost.com.au/api/postcode/search.txt?key=' . $api_key . '&q=' . $q . '&limit=10', array(
 
-  ));*/
-  $api_key = 'e6b27996-be38-424e-9d66-14fddc860c34';
-  $api_url = 'https://digitalapi.auspost.com.au/postcode/search.txt?';
-  $query = implode('&', ['q=' . urlencode($q), 'limit=10']);
-  $resp = wp_remote_get($api_url . $query, array(
-    'headers' => [
-      'auth-key' => $api_key,
-    ],
-  ));
-  if (is_wp_error($resp)) {
-    error_log('AusPost fetch failed');
-    wp_send_json_error(array('message' => 'Remote fetch failed'), 500);
-    wp_die();
-  }
-  $rawSuburbs = explode("\n", trim($resp['body']));
-  $suburbs = [];
-  foreach ($rawSuburbs as $rawSuburb) {
-    $parts = explode("|", $rawSuburb);
-    if (count($parts) < 4) {
-      continue;
+  //Try getting from cache first, API calls are slow
+  $cacheKey = 'auspost_api_postcode';
+  $transientKey = $cacheKey . '_' . $q;
+
+  $suburbs = get_transient($transientKey);
+
+  if (!$suburbs) {
+
+    $api_key = 'e6b27996-be38-424e-9d66-14fddc860c34';
+    $api_url = 'https://digitalapi.auspost.com.au/postcode/search.txt?';
+    $query = implode('&', ['q=' . urlencode($q), 'limit=10']);
+    $resp = wp_remote_get($api_url . $query, array(
+      'headers' => [
+        'auth-key' => $api_key,
+      ],
+    ));
+    if (is_wp_error($resp)) {
+      error_log('AusPost fetch failed');
+      wp_send_json_error(array('message' => 'Remote fetch failed'), 500);
+      wp_die();
+    }
+    $content = trim(wp_remote_retrieve_body($resp));
+
+    $rawSuburbs = explode("\n", $content);
+
+    $suburbs = [];
+    foreach ($rawSuburbs as $rawSuburb) {
+      $parts = explode("|", $rawSuburb);
+      if (count($parts) < 4) {
+        continue;
+      }
+
+      $suburbs[] = [
+        'name' => $parts[2],
+        'suburb' => $parts[2],
+        'postcode' => $parts[1],
+        'state' => $parts[3],
+        'location' => postcode_to_location($parts[1]),
+      ];
     }
 
-    $suburbs[] = [
-      'name' => $parts[2],
-      'suburb' => $parts[2],
-      'postcode' => $parts[1],
-      'state' => $parts[3],
-      'location' => postcode_to_location($parts[1]),
-    ];
+    set_transient($transientKey, $suburbs, 60 * 60 * 24 * 3600); // cache for a year. how often to postcodes/suburbs change?
   }
 
   wp_send_json($suburbs);

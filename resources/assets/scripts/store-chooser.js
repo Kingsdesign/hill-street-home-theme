@@ -2,7 +2,7 @@
 
 //import MicroModal from "micromodal";
 import autoComplete from "@tarekraafat/autocomplete.js";
-import fetch from "unfetch";
+//import fetch from "unfetch";
 //import modalConfig from "./util/modalConfig";
 import ModalService from "./services/modalService";
 import { ucWords, ucFirst, deslugify } from "./util/string-helpers";
@@ -224,6 +224,73 @@ const onSelectLocation = function () {
   saveForm();
 };
 
+const cacheName = "wc_sc_postcode";
+const fetchData = async (value) => {
+  const cache = await caches.open(cacheName);
+  let response;
+
+  const cacheKey = data.ajax_url + "?action=postcode_search&q=" + value;
+
+  try {
+    response = await cache.match(cacheKey);
+    if (response) response = response.clone();
+  } catch (e) {
+    //Do nothing
+  }
+
+  if (!response) {
+    try {
+      response = await fetch(data.ajax_url, {
+        method: "POST",
+        credentials: "include", // include, *same-origin, omit
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        body: "action=postcode_search&q=" + value,
+      });
+
+      if (response.ok) {
+        //This is async, but we dont care about when it finishes, so no await
+        cache.put(cacheKey, response.clone());
+      }
+    } catch (e) {
+      console.error("Failed to fetch", e);
+      //Do nothing
+    }
+  }
+
+  if (response) {
+    return await response.json();
+  }
+  return [];
+};
+
+/*function fetchSuburbs() {
+  let resolve, reject, cancelled;
+  const promise = new Promise((resolveFromPromise, rejectFromPromise) => {
+    resolve = resolveFromPromise;
+    reject = rejectFromPromise;
+  });
+
+  Promise.resolve().then(wrapWithCancel(fetchData)).then(resolve).then(reject);
+
+  return {
+    promise,
+    cancel: () => {
+      cancelled = true;
+      reject({ reason: "cancelled" });
+    },
+  };
+
+  function wrapWithCancel(fn) {
+    return (data) => {
+      if (!cancelled) {
+        return fn(data);
+      }
+    };
+  }
+}*/
+
 /**
  * Bind data  & events etc when modal opens
  */
@@ -277,81 +344,23 @@ function onShowModal(modal) {
     }
   };
 
-  const fetchData = () => {
-    const value = document.querySelector("#autoComplete").value;
-    if (!value) {
-      //console.log("NO VALUE!");
-      return [];
-    }
-    if (value.length < 3) return [];
-
-    return fetch(data.ajax_url, {
-      method: "POST",
-      credentials: "include", // include, *same-origin, omit
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-      },
-      body: "action=postcode_search&q=" + value,
-    })
-      .then((r) => {
-        if (r.ok) return r;
-        console.error(`AusPost fetch failed`);
-        throw new Error(r.statusText);
-      })
-      .then((r) => r.json())
-      .then((resp) => {
-        console.log(resp);
-        if (!resp) {
-          //console.log("NO RESPONSE!");
-          return [];
-        }
-        return resp;
-      });
-  };
-
-  function fetchSuburbs() {
-    let resolve, reject, cancelled;
-    const promise = new Promise((resolveFromPromise, rejectFromPromise) => {
-      resolve = resolveFromPromise;
-      reject = rejectFromPromise;
-    });
-
-    Promise.resolve()
-      .then(wrapWithCancel(fetchData))
-      .then(resolve)
-      .then(reject);
-
-    return {
-      promise,
-      cancel: () => {
-        cancelled = true;
-        reject({ reason: "cancelled" });
-      },
-    };
-
-    function wrapWithCancel(fn) {
-      return (data) => {
-        if (!cancelled) {
-          return fn(data);
-        }
-      };
-    }
-  }
-
-  let promise, cancel;
+  //let promise, cancel;
 
   new autoComplete({
     data: {
       // Data src [Array, Function, Async] | (REQUIRED)
-      src: () => {
-        if (cancel) cancel();
-        const f = fetchSuburbs();
-        promise = f.promise;
-        cancel = f.cancel;
-        return promise;
+      src: async () => {
+        const value = document.querySelector("#autoComplete").value;
+        if (!value) {
+          return [];
+        }
+        if (value.length < 3) return [];
+        const data = await fetchData(value);
+        console.log("fetched", data);
+        return data;
       },
       key: ["name", "postcode"],
-      cache: false,
+      cache: false, //caching is handled manually
     },
     placeHolder: "Postcode or suburb", // Place Holder text                 | (Optional)
     selector: "#autoComplete", // Input field selector              | (Optional)
