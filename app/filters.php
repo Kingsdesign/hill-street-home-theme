@@ -129,18 +129,18 @@ add_filter('wp_get_attachment_image_attributes', function ($attr, $attachment) {
  * Get store chooser data from cookie
  */
 function get_sc_data() {
-  if (class_exists('\WC_OrderByLocation')) {
-    if (isset($_COOKIE[\WC_OrderByLocation::$location_var_name])) {
-      $cookie_data_raw = $_COOKIE[\WC_OrderByLocation::$location_var_name];
-      try {
-        $cookie_data = \json_decode(stripslashes($cookie_data_raw), true);
-        return $cookie_data;
+  //if (class_exists('\WC_OrderByLocation')) {
+  if (isset($_COOKIE[wc_sc_cookie_name()])) {
+    $cookie_data_raw = $_COOKIE[wc_sc_cookie_name()];
+    try {
+      $cookie_data = \json_decode(stripslashes($cookie_data_raw), true);
+      return $cookie_data;
 
-      } catch (Exception $e) {
+    } catch (Exception $e) {
 
-      }
     }
   }
+  //}
   return null;
 }
 
@@ -170,14 +170,14 @@ function sc_suburb_is($test) {
 /**
  * Inject the location from our own cookie
  */
-add_filter('wc_obl/location', function ($location) {
-  $sc_data = get_sc_data();
-  if ($sc_data && isset($sc_data['location'])) {
-    return $sc_data['location'];
-  }
+// add_filter('wc_obl/location', function ($location) {
+//   $sc_data = get_sc_data();
+//   if ($sc_data && isset($sc_data['location'])) {
+//     return $sc_data['location'];
+//   }
 
-  return $location;
-}, 10, 1);
+//   return $location;
+//}, 10, 1);
 
 /**
  * For a given postcode, get the location term slug
@@ -185,23 +185,63 @@ add_filter('wc_obl/location', function ($location) {
  * Checks list of 'devonport' postcodes from ACF
  */
 function postcode_to_location($postcode) {
-  $default_location = 'west-hobart';
-  $test_location = 'devonport';
-  $postcodes = get_field('postcodes_devonport', 'options');
-  /*if (empty($postcodes)) {
-  return $default_location;
-  }*/
+  // $default_location = 'west-hobart';
+  // $test_location = 'devonport';
+  // $postcodes = get_field('postcodes_devonport', 'options');
+  // /*if (empty($postcodes)) {
+  // return $default_location;
+  // }*/
 
-  $return_location = $default_location;
+  // $return_location = $default_location;
 
-  foreach (explode("\n", $postcodes) as $testPostcode) {
-    //if (strcasecmp($postcode, $testPostcode) === 0) {
-    if (trim($postcode) == trim($testPostcode)) {
-      //return $test_location;
-      $return_location = $test_location;
+  // foreach (explode("\n", $postcodes) as $testPostcode) {
+  //   //if (strcasecmp($postcode, $testPostcode) === 0) {
+  //   if (trim($postcode) == trim($testPostcode)) {
+  //     //return $test_location;
+  //     $return_location = $test_location;
+  //     break;
+  //   }
+  // }
+  // return $return_location;
+
+  //Get all locations
+  $locations = get_terms(array(
+    'taxonomy' => 'location',
+    'hide_empty' => false,
+  ));
+  $fallback_location = null;
+  $return_location = null;
+
+  foreach ($locations as $location_term) {
+    $is_delivery_enabled = get_field('is_delivery_enabled', $location_term);
+    //if this location doesn't do delivery, just skip. Currently we don't actually use the 'delivery_location' (e.g. the assigned fulfilment store for this location)
+    //$delivery_location = get_field('delivery_location', $location_term);
+    if (!$is_delivery_enabled) {
+      continue;
+    }
+
+    //If this is the fallback store, assign that to the fallback
+    $is_fallback = get_field('is_fallback', $location_term);
+    if ($is_fallback) {
+      $fallback_location = $location_term->slug;
+    }
+
+    //See if the requested postcode belongs to this store
+    $delivery_postcodes = array_map(function ($pc) {return trim($pc);}, explode("\n", get_field('delivery_postcodes', $location_term)));
+    if (!is_array($delivery_postcodes)) {
+      $delivery_postcodes = [];
+    }
+
+    if (!empty($delivery_postcodes) && in_array($postcode, $delivery_postcodes)) {
+      $return_location = $location_term->slug;
       break;
     }
   }
+
+  if (!$return_location) {
+    $return_location = $fallback_location;
+  }
+
   return $return_location;
 }
 
@@ -258,7 +298,7 @@ function ajax_postcode_search() {
 /**
  * Remove scripts/styles from order-by-location
  */
-add_filter('wc_obl/enqueue_frontend', '__return_false');
+//add_filter('wc_obl/enqueue_frontend', '__return_false');
 
 /**
  * Get cart count

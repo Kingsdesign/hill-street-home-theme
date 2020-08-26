@@ -8,7 +8,7 @@ const galleries = document.querySelectorAll(
 Array.from(galleries).forEach(initGallery);
 
 function initGallery(galleryEl) {
-  console.log("init gallery");
+  //console.log("init gallery");
   galleryEl.classList.add("glide");
   const glideTrack = document.createElement("div");
   glideTrack.classList.add("glide__track");

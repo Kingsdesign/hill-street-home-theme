@@ -200,10 +200,8 @@ const saveForm = () => {
     { method, suburb, postcode, location },
     { expires: 365 }
   );
-  Cookies.remove("wc_obl_stock_location");
-  Cookies.remove("wc_obl_stock_location", { path: "" });
-  Cookies.set("wc_obl_stock_location", location, { expires: 365 });
-  //MicroModal.close("modal-store-chooser");
+  Cookies.set(cookieName + "_location", location, { expires: 365 }); // we also set the cookie name + location to just the location for use with the cache key
+
   renderDomData();
 
   window.location.reload();

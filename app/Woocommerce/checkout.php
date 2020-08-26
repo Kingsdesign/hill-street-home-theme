@@ -271,15 +271,15 @@ add_action('wp_footer', function () {
     return;
   }
 
-  if (class_exists('\WC_OrderByLocation')) {
-    $data = array('cookie_name' => \WC_OrderByLocation::$location_var_name, 'date_restrictions' => get_checkout_date_restrictions());
-    echo "<script>\n/* <![CDATA[ */\n";
-    echo 'var custom_checkout_data = ' . json_encode($data);
-    echo "\n/* ]]> */\n</script>";
-    wp_enqueue_script('sage/checkout.js', asset_path('scripts/checkout.js'), array(), null, false);
-    wp_print_scripts('sage/checkout.js');
-    //wp_localize_script('sage/checkout.js', 'custom_checkout_data', array('cookie_name' => \WC_OrderByLocation::$location_var_name));
-  }
+  //if (class_exists('\WC_OrderByLocation')) {
+  $data = array('cookie_name' => wc_sc_cookie_name(), 'date_restrictions' => get_checkout_date_restrictions());
+  echo "<script>\n/* <![CDATA[ */\n";
+  echo 'var custom_checkout_data = ' . json_encode($data);
+  echo "\n/* ]]> */\n</script>";
+  wp_enqueue_script('sage/checkout.js', asset_path('scripts/checkout.js'), array(), null, false);
+  wp_print_scripts('sage/checkout.js');
+  //wp_localize_script('sage/checkout.js', 'custom_checkout_data', array('cookie_name' => \WC_OrderByLocation::$location_var_name));
+  //}
   //WARNING HAX
   // This forces checkout-wc not to validate shipping fields on customer info tab
   /*echo '<script>(function(w){

@@ -1,4 +1,5 @@
 {
+  "open": false,
   "entry": {
     "main": ["./scripts/main.js", "./styles/main.scss"],
     "customizer": ["./scripts/customizer.js"],
