@@ -14,6 +14,7 @@ import {
   endOfToday,
   endOfDay,
   isSunday,
+  isSaturday,
 } from "date-fns";
 
 import $ from "jquery";
@@ -144,7 +145,7 @@ function restrictDatePicker() {
         location === "devonport" &&
         method === "delivery" &&
         +cookieData.postcode !== 7310 &&
-        isSunday(showDate)
+        (isSunday(showDate) || isSaturday(showDate))
       ) {
         console.log("NO DELIVERY FOR DEVONPORT ON SUNDAY YO EXCEPT TO 7310");
         isEnabled = false;
