@@ -293,8 +293,12 @@ function replaceAssets(html) {
   const neverReloadScripts = [
     "/wp-content/themes/hillsthome/dist/scripts/main.js",
     "/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
+    "/wp-includes/js/admin-bar.min.js",
   ];
   const neverReloadStyles = [
+    "/wp-includes/css/dist/block-library/style.min.css",
+    "/wp-includes/css/dashicons.min.css",
+    "/wp-includes/css/admin-bar.min.css",
     "/wp-content/themes/hillsthome/dist/styles/main.css",
     "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;1,400&display=swap",
     "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap",
@@ -348,11 +352,6 @@ function replaceAssets(html) {
   Array.from(newBodyAssets.styles).forEach((assetEl) =>
     insertStyle(assetEl, document.body)
   );
-
-  setTimeout(() => {
-    //Remove assets
-    // hideOverlay();
-  }, 300);
 }
 
 const assetInList = (src, array) => {
