@@ -2,21 +2,22 @@
 
 //import MicroModal from "micromodal";
 import autoComplete from "@tarekraafat/autocomplete.js";
-import fetch from "unfetch";
+//import fetch from "unfetch";
 //import modalConfig from "./util/modalConfig";
 import ModalService from "./services/modalService";
 import { ucWords, ucFirst, deslugify } from "./util/string-helpers";
-import { ready, addEventListener } from "./util/dom-help";
+import { ready, addEventListener, removeEventListener } from "./util/dom-help";
 import barba from "@barba/core";
+import throttle from "./util/throttle";
 
 const Cookies = window.Cookies;
 const data = window.store_chooser_data;
 
 const cookieName = data.cookie_name;
 
-console.log(data);
+//console.log(data);
 
-const MdCheck = `<svg class="icon" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"> <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path> </svg>`;
+//const MdCheck = `<svg class="icon" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"> <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path> </svg>`;
 
 const cookieData = (() => {
   try {
@@ -131,7 +132,7 @@ function renderDomData() {
   Array.from(
     document.querySelectorAll('[data-sc-tpl="header_string"]')
   ).forEach((el) => {
-    if (!method || !postcode || !suburb) return;
+    if (!haveRequiredData()) return;
     let str =
       _d.method_display +
       " " +
@@ -142,8 +143,26 @@ function renderDomData() {
   });
 }
 
+/**
+ * This is needed in a couple of places, so we've abstracted it
+ * Essentially check whether we have the required combination of
+ * method, postcode, suburb & location
+ *
+ * Currently this is:
+ * always need method
+ * if pickup, need location
+ * if delivery need all 3 (location is fetched via ajax in form)
+ */
+function haveRequiredData() {
+  if (!method) return false;
+  if (method === "pickup" && !location) return false;
+  if (method === "delivery" && (!location || !postcode || !suburb))
+    return false;
+  return true;
+}
+
 function maybeShowModal() {
-  if (!method || !postcode || !suburb || !location) {
+  if (!haveRequiredData()) {
     showModal();
   }
 }
@@ -153,216 +172,195 @@ function maybeShowModal() {
  * also init micromodal if not already
  */
 function showModal() {
-  /*MicroModal.init(modalConfig);
-
-  MicroModal.show("modal-store-chooser", {
+  ModalService.show("modal-store-chooser", {
     onShow: onShowModal,
-  });*/
-  ModalService.show("modal-store-chooser", { onShow: onShowModal });
+    onClose: onCloseModal,
+  });
 }
+
+/**
+ * MODAL METHODS
+ */
+const saveForm = () => {
+  //if (!method || !suburb || !postcode || !location) return;
+  //We always need method & location. If delivery we need suburb & postcode
+
+  if (!haveRequiredData()) {
+    console.error("Some required data missing", {
+      method,
+      location,
+      suburb,
+      postcode,
+    });
+    return;
+  }
+
+  Cookies.set(
+    cookieName,
+    { method, suburb, postcode, location },
+    { expires: 365 }
+  );
+  Cookies.set(cookieName + "_location", location, { expires: 365 }); // we also set the cookie name + location to just the location for use with the cache key
+
+  renderDomData();
+
+  window.location.reload();
+};
+
+/**
+ * MODAL EVENT HANDLERS
+ */
+const onSavePostcode = () => {
+  if (!postcode || !suburb || !location) return;
+  method = "delivery";
+  saveForm();
+};
+
+const onSelectLocation = function () {
+  method = "pickup";
+  location = this.dataset.scLocation;
+  postcode = null;
+  suburb = null;
+  saveForm();
+};
+
+const cacheName = "wc_sc_postcode";
+const fetchData = async (value) => {
+  const cache = await caches.open(cacheName);
+  let response;
+
+  const cacheKey = data.ajax_url + "?action=postcode_search&q=" + value;
+
+  try {
+    response = await cache.match(cacheKey);
+    if (response) response = response.clone();
+  } catch (e) {
+    //Do nothing
+  }
+
+  if (!response) {
+    try {
+      response = await fetch(data.ajax_url, {
+        method: "POST",
+        credentials: "include", // include, *same-origin, omit
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        body: "action=postcode_search&q=" + value,
+      });
+
+      if (response.ok) {
+        //This is async, but we dont care about when it finishes, so no await
+        cache.put(cacheKey, response.clone());
+      }
+    } catch (e) {
+      console.error("Failed to fetch", e);
+      //Do nothing
+    }
+  }
+
+  if (response) {
+    return await response.json();
+  }
+  return [];
+};
+
+/*function fetchSuburbs() {
+  let resolve, reject, cancelled;
+  const promise = new Promise((resolveFromPromise, rejectFromPromise) => {
+    resolve = resolveFromPromise;
+    reject = rejectFromPromise;
+  });
+
+  Promise.resolve().then(wrapWithCancel(fetchData)).then(resolve).then(reject);
+
+  return {
+    promise,
+    cancel: () => {
+      cancelled = true;
+      reject({ reason: "cancelled" });
+    },
+  };
+
+  function wrapWithCancel(fn) {
+    return (data) => {
+      if (!cancelled) {
+        return fn(data);
+      }
+    };
+  }
+}*/
 
 /**
  * Bind data  & events etc when modal opens
  */
 function onShowModal(modal) {
-  //modalConfig.onShow(modal);
-  /*const [state, setState] = State(
-    {
-      method: "",
-      postcode: "",
-      suburb: "",
-    },
-    
-  );*/
+  const saveButtonSelector = '[data-sc-action="save-postcode"]';
 
-  /**
-   * DONT USE OLD VAL RIGHT NOW
-   */
-  const sideEffects = {
-    method: (oldVal, newVal) => {
-      //console.log("method changed", { oldVal, newVal });
-      //Method updated
-      const selectedButton = document.querySelector(
-        `#modal-store-chooser--content #sc-${newVal}`
-      );
-      const buttons = document.querySelectorAll(
-        `#modal-store-chooser--content #sc-delivery,#modal-store-chooser--content #sc-pickup`
-      );
-      Array.from(buttons).forEach((btn) => {
-        btn.classList.add("btn-outline");
-        Array.from(btn.querySelectorAll(".icon")).forEach((icon) =>
-          icon.remove()
-        );
-      });
-      if (!selectedButton) return;
-      selectedButton.classList.remove("btn-outline");
-      const iconTmp = document.createElement("div");
-      iconTmp.innerHTML = MdCheck;
-      const icon = iconTmp.querySelector("svg");
-      selectedButton.appendChild(icon);
+  //Initial state
+  if (suburb && postcode) {
+    modal.querySelector("#autoComplete").value = `${suburb} ${postcode}`;
 
-      validateForm();
-    },
-    postcode: (oldVal, newVal) => {
-      //  console.log("postcode changed", { oldVal, newVal });
-      validateForm();
-    },
-    suburb: (oldVal, newVal) => {
-      // console.log("suburb changed", { oldVal, newVal });
-      validateForm();
-    },
-    location: (oldVal, newVal) => {
-      // console.log("suburb changed", { oldVal, newVal });
-      validateForm();
-    },
-  };
+    modal.querySelector(saveButtonSelector).removeAttribute("disabled");
+  }
 
-  const setMethod = function (e) {
-    if (this.dataset.scMethod) {
-      //setState({ method: this.dataset.scMethod });
-      method = this.dataset.scMethod;
-      sideEffects.method(method, this.dataset.scMethod);
+  Array.from(modal.querySelectorAll("[data-sc-location]")).forEach((button) => {
+    if (location && method === "pickup") {
+      if (button.dataset.scLocation !== location)
+        button.classList.remove("btn-outline");
+    } else {
+      button.classList.remove("btn-outline");
     }
-  };
+  });
+
+  //BIND EVENTS
+  addEventListener(
+    "click",
+    '[data-sc-action="save-postcode"]',
+    onSavePostcode,
+    modal
+  );
+
+  addEventListener("click", "[data-sc-location]", onSelectLocation, modal);
 
   const onSelection = (feedback) => {
     const selection = feedback.selection.value;
-    //console.log("Selection: ", selection);
     // Render selected choice to selection div
-    document.querySelector("#autoComplete").value =
+    modal.querySelector("#autoComplete").value =
       selection.name + " " + selection.postcode;
 
-    /*setState({
-      postcode: selection.postcode,
-      suburb: selection.suburb,
-    });*/
     postcode = selection.postcode;
     suburb = selection.suburb;
     location = selection.location;
-    sideEffects.postcode(postcode, selection.postcode);
-    sideEffects.suburb(suburb, selection.suburb);
-    sideEffects.location(location, selection.location);
-  };
 
-  const validateForm = () => {
-    if (method && postcode && suburb) {
-      const btn = document.querySelector(
-        "#modal-store-chooser--content #sc-save"
-      );
-      if (!btn) return;
-
-      btn.removeAttribute("disabled");
-
-      renderDomData();
-    } /*else {
-
-    }*/
-  };
-
-  const saveForm = () => {
-    if (!method || !suburb || !postcode || !location) return;
-
-    Cookies.set(
-      cookieName,
-      { method, suburb, postcode, location },
-      { expires: 365 }
-    );
-    Cookies.remove("wc_obl_stock_location");
-    Cookies.remove("wc_obl_stock_location", { path: "" });
-    Cookies.set("wc_obl_stock_location", location, { expires: 365 });
-    //MicroModal.close("modal-store-chooser");
-    renderDomData();
-
-    window.location.reload();
-  };
-
-  addEventListener("click", "[data-sc-method]", setMethod);
-  addEventListener("click", "#sc-save", saveForm);
-
-  //Set inital values
-  if (method) {
-    sideEffects.method("", method);
-  }
-  if (suburb && postcode) {
-    document.querySelector("#autoComplete").value = `${suburb} ${postcode}`;
-    //sideEffects.suburb("",lo)
-  }
-
-  const fetchData = () => {
-    const value = document.querySelector("#autoComplete").value;
-    if (!value) {
-      //console.log("NO VALUE!");
-      return [];
+    if (postcode && suburb && location) {
+      modal
+        .querySelector('[data-sc-action="save-postcode"]')
+        .removeAttribute("disabled");
+    } else {
+      modal
+        .querySelector('[data-sc-action="save-postcode"]')
+        .setAttribute("disabled", "disabled");
     }
-    if (value.length < 3) return [];
-
-    return fetch(data.ajax_url, {
-      method: "POST",
-      credentials: "include", // include, *same-origin, omit
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-      },
-      body: "action=postcode_search&q=" + value,
-    })
-      .then((r) => {
-        if (r.ok) return r;
-        console.error(`AusPost fetch failed`);
-        throw new Error(r.statusText);
-      })
-      .then((r) => r.json())
-      .then((resp) => {
-        console.log(resp);
-        if (!resp) {
-          //console.log("NO RESPONSE!");
-          return [];
-        }
-        return resp;
-      });
   };
 
-  function fetchSuburbs() {
-    let resolve, reject, cancelled;
-    const promise = new Promise((resolveFromPromise, rejectFromPromise) => {
-      resolve = resolveFromPromise;
-      reject = rejectFromPromise;
-    });
-
-    Promise.resolve()
-      .then(wrapWithCancel(fetchData))
-      .then(resolve)
-      .then(reject);
-
-    return {
-      promise,
-      cancel: () => {
-        cancelled = true;
-        reject({ reason: "cancelled" });
-      },
-    };
-
-    function wrapWithCancel(fn) {
-      return (data) => {
-        if (!cancelled) {
-          return fn(data);
-        }
-      };
-    }
-  }
-
-  let promise, cancel;
+  //let promise, cancel;
 
   new autoComplete({
     data: {
       // Data src [Array, Function, Async] | (REQUIRED)
-      src: () => {
-        if (cancel) cancel();
-        const f = fetchSuburbs();
-        promise = f.promise;
-        cancel = f.cancel;
-        return promise;
+      src: async () => {
+        const value = document.querySelector("#autoComplete").value;
+        if (!value) {
+          return [];
+        }
+        if (value.length < 3) return [];
+        const data = await fetchData(value);
+        console.log("fetched", data);
+        return data;
       },
       key: ["name", "postcode"],
-      cache: false,
+      cache: false, //caching is handled manually
     },
     placeHolder: "Postcode or suburb", // Place Holder text                 | (Optional)
     selector: "#autoComplete", // Input field selector              | (Optional)
@@ -427,9 +425,14 @@ function onShowModal(modal) {
           resultsList.style.display = "none";
         } else if (eventType === "focus") {
           // Show results list & hide other elemennts
-
           resultsList.style.display = "block";
         }
       });
   });
+}
+
+function onCloseModal(modal) {
+  //TODO event listeners are not removed
+
+  removeEventListener("click", "[data-sc-location]", onSelectLocation, modal);
 }

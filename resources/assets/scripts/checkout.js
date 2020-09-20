@@ -39,17 +39,90 @@ ready(() => {
     });
   }
 
-  /*addEventListener("click", ".cfw-next-tab", function (e) {
-    //TODO validations
-    console.log("click", this);
-  });*/
+  // addEventListener("click", ".cfw-next-tab", function (e) {
+  //   //TODO validations
+  //   e.preventDefault();
+  // });
+
+  $(window.cfwEventData.elements.tabContainerElId).on(
+    "easytabs:before",
+    function (event, $clicked, $targetPanel, settings) {
+      const $currentPanel = $(
+        window.cfwEventData.elements.tabContainerElId + " .cfw-panel.active"
+      );
+      if ($currentPanel[0].id === "cfw-customer-info") {
+        var $phone = $currentPanel.find("#phone_field #phone");
+        if ($phone && $phone.get(0) && $phone.parsley().validate() !== true) {
+          return false;
+        }
+
+        var $date = $currentPanel.find("#date_field #date");
+        if ($date && $date.get[0] && $date.parsley().validate() !== true) {
+          return false;
+        }
+
+        var $time = $currentPanel.find('#time_field [name="time"]');
+        var timeValid = true;
+        $time.each(function () {
+          $(this).attr("data-parsley-required", true);
+          if ($(this).parsley().validate() !== true) {
+            timeValid = false;
+          }
+        });
+        if (!timeValid) {
+          return false;
+        }
+      }
+    }
+  );
 
   //Restrict date picker options
   restrictDatePicker();
   //$("#date.date-picker").datepicker("option", "minDate", new Date(2007, 1 - 1, 1));
 
   initValidateDate();
+
+  initCardMessage();
 });
+
+function initCardMessage() {
+  const cardMessageField = document.getElementById("card_message_field");
+  if (!cardMessageField) return;
+
+  const cardMessageInput = cardMessageField.querySelector("#card_message");
+  if (!cardMessageInput) return;
+
+  const maxlength = +cardMessageInput.getAttribute("maxlength");
+  console.log({ maxlength });
+  if (!maxlength) return;
+
+  const cardMessageDisplay = document.createElement("div");
+  cardMessageDisplay.className = "card-message-maxlength";
+  const cardMessageDisplayText = (length) =>
+    `${length}/${maxlength} characters`;
+
+  const doValidation = () => {
+    const length = cardMessageInput.value.length;
+    cardMessageDisplay.innerHTML = cardMessageDisplayText(length);
+
+    if (length === maxlength) {
+      cardMessageDisplay.classList.add("card-message-maxlength--invalid");
+    } else if (
+      cardMessageDisplay.classList.contains("card-message-maxlength--invalid")
+    ) {
+      cardMessageDisplay.classList.remove("card-message-maxlength--invalid");
+    }
+  };
+
+  const handleKeyup = () => {
+    doValidation();
+  };
+
+  cardMessageField.appendChild(cardMessageDisplay);
+  doValidation();
+
+  cardMessageInput.addEventListener("keyup", handleKeyup);
+}
 
 function restrictDatePicker() {
   const datePicker = document.querySelector("#date.checkout-date-picker");
@@ -147,7 +220,6 @@ function restrictDatePicker() {
         +cookieData.postcode !== 7310 &&
         (isSunday(showDate) || isSaturday(showDate))
       ) {
-        console.log("NO DELIVERY FOR DEVONPORT ON SUNDAY YO EXCEPT TO 7310");
         isEnabled = false;
       }
 

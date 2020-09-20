@@ -17,40 +17,41 @@ add_action('wp_enqueue_scripts', function () {
   $main_data = ['ajax_url' => admin_url('admin-ajax.php')];
   if (is_product()) {
     $main_data['single_product'] = [
+      //alcohol
       'hide_addons' => (has_term('edible', 'product_cat', $post) || has_term('fresh', 'product_cat', $post)) && get_post_field('slug', $post) !== 'gift-card',
       'product_id' => $post->ID,
     ];
 
     wp_enqueue_script('sage/single-product.js', asset_path('scripts/single-product.js'), ['jquery'], null, true);
   }
-  if (class_exists('\WC_OrderByLocation')) {
-    $main_data['cookie_name'] = \WC_OrderByLocation::$location_var_name;
-  }
+  //if (class_exists('\WC_OrderByLocation')) {
+  $main_data['cookie_name'] = wc_sc_cookie_name();
+  //}
   wp_localize_script('sage/main.js', 'main_data', $main_data);
 
   /**
    * Store chooser needs some logic
    */
   //Js-cookie is provided by WC
-  if (class_exists('\WC_OrderByLocation')) {
-    $terms = array_map(function ($term) {
-      return ['id' => $term->term_id, 'name' => $term->name, 'slug' => $term->slug];
-    },
-      get_terms(array(
-        'taxonomy' => 'location',
-        'hide_empty' => false,
-      ))
-    );
+  //if (class_exists('\WC_OrderByLocation')) {
+  $terms = array_map(function ($term) {
+    return ['id' => $term->term_id, 'name' => $term->name, 'slug' => $term->slug];
+  },
+    get_terms(array(
+      'taxonomy' => 'location',
+      'hide_empty' => false,
+    ))
+  );
 
-    if (class_exists('\WC_OrderByLocation')) {
-      wp_enqueue_script('sage/store-chooser.js', asset_path('scripts/store-chooser.js'), ['jquery', 'js-cookie'], null, true);
-      wp_localize_script('sage/store-chooser.js', 'store_chooser_data', array(
-        'locations' => $terms,
-        'cookie_name' => \WC_OrderByLocation::$location_var_name,
-        'ajax_url' => admin_url('admin-ajax.php'),
-      ));
-    }
-  }
+  //if (class_exists('\WC_OrderByLocation')) {
+  wp_enqueue_script('sage/store-chooser.js', asset_path('scripts/store-chooser.js'), ['jquery', 'js-cookie'], null, true);
+  wp_localize_script('sage/store-chooser.js', 'store_chooser_data', array(
+    'locations' => $terms,
+    'cookie_name' => wc_sc_cookie_name(),
+    'ajax_url' => admin_url('admin-ajax.php'),
+  ));
+  //}
+  //}
 
   if (is_single() && comments_open() && get_option('thread_comments')) {
     wp_enqueue_script('comment-reply');
@@ -353,3 +354,47 @@ add_action('wp_enqueue_scripts', function () {
   //global $wp_styles;
   //print_r($wp_styles);
 }, 99);
+
+/**
+ * Register stock location taxonomy
+ */
+add_action('init', function () {
+  $labels = array(
+    'name' => __('Location'),
+    'singular_name' => __('Location'),
+    'menu_name' => __('Stock locations'),
+    'all_items' => __('All Items'),
+    'parent_item' => __('Parent Item'),
+    'parent_item_colon' => __('Parent Item:'),
+    'new_item_name' => __('New Item Name'),
+    'add_new_item' => __('Add New Item'),
+    'edit_item' => __('Edit Item'),
+    'update_item' => __('Update Item'),
+    'separate_items_with_commas' => __('Separate Item with commas'),
+    'search_items' => __('Search Items'),
+    'add_or_remove_items' => __('Add or remove Items'),
+    'choose_from_most_used' => __('Choose from the most used Items'),
+  );
+  $capabilities = array(
+    'manage_terms' => 'manage_woocommerce',
+    'edit_terms' => 'manage_woocommerce',
+    'delete_terms' => 'manage_woocommerce',
+    'assign_terms' => 'manage_woocommerce',
+  );
+  $args = array(
+    'labels' => $labels,
+    'hierarchical' => true,
+    'public' => true,
+    'show_ui' => true,
+    'show_admin_column' => true,
+    'show_in_nav_menus' => true,
+    'show_tagcloud' => true,
+    'capabilities' => $capabilities,
+  );
+
+  $tax_plural_name = 'locations';
+  $tax_singular_name = 'location';
+
+  register_taxonomy($tax_singular_name, 'product', $args);
+  register_taxonomy_for_object_type($tax_singular_name, 'product');
+}, 0);

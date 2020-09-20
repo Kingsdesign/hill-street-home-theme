@@ -129,18 +129,18 @@ add_filter('wp_get_attachment_image_attributes', function ($attr, $attachment) {
  * Get store chooser data from cookie
  */
 function get_sc_data() {
-  if (class_exists('\WC_OrderByLocation')) {
-    if (isset($_COOKIE[\WC_OrderByLocation::$location_var_name])) {
-      $cookie_data_raw = $_COOKIE[\WC_OrderByLocation::$location_var_name];
-      try {
-        $cookie_data = \json_decode(stripslashes($cookie_data_raw), true);
-        return $cookie_data;
+  //if (class_exists('\WC_OrderByLocation')) {
+  if (isset($_COOKIE[wc_sc_cookie_name()])) {
+    $cookie_data_raw = $_COOKIE[wc_sc_cookie_name()];
+    try {
+      $cookie_data = \json_decode(stripslashes($cookie_data_raw), true);
+      return $cookie_data;
 
-      } catch (Exception $e) {
+    } catch (Exception $e) {
 
-      }
     }
   }
+  //}
   return null;
 }
 
@@ -170,14 +170,14 @@ function sc_suburb_is($test) {
 /**
  * Inject the location from our own cookie
  */
-add_filter('wc_obl/location', function ($location) {
-  $sc_data = get_sc_data();
-  if ($sc_data && isset($sc_data['location'])) {
-    return $sc_data['location'];
-  }
+// add_filter('wc_obl/location', function ($location) {
+//   $sc_data = get_sc_data();
+//   if ($sc_data && isset($sc_data['location'])) {
+//     return $sc_data['location'];
+//   }
 
-  return $location;
-}, 10, 1);
+//   return $location;
+//}, 10, 1);
 
 /**
  * For a given postcode, get the location term slug
@@ -185,23 +185,63 @@ add_filter('wc_obl/location', function ($location) {
  * Checks list of 'devonport' postcodes from ACF
  */
 function postcode_to_location($postcode) {
-  $default_location = 'west-hobart';
-  $test_location = 'devonport';
-  $postcodes = get_field('postcodes_devonport', 'options');
-  /*if (empty($postcodes)) {
-  return $default_location;
-  }*/
+  // $default_location = 'west-hobart';
+  // $test_location = 'devonport';
+  // $postcodes = get_field('postcodes_devonport', 'options');
+  // /*if (empty($postcodes)) {
+  // return $default_location;
+  // }*/
 
-  $return_location = $default_location;
+  // $return_location = $default_location;
 
-  foreach (explode("\n", $postcodes) as $testPostcode) {
-    //if (strcasecmp($postcode, $testPostcode) === 0) {
-    if (trim($postcode) == trim($testPostcode)) {
-      //return $test_location;
-      $return_location = $test_location;
+  // foreach (explode("\n", $postcodes) as $testPostcode) {
+  //   //if (strcasecmp($postcode, $testPostcode) === 0) {
+  //   if (trim($postcode) == trim($testPostcode)) {
+  //     //return $test_location;
+  //     $return_location = $test_location;
+  //     break;
+  //   }
+  // }
+  // return $return_location;
+
+  //Get all locations
+  $locations = get_terms(array(
+    'taxonomy' => 'location',
+    'hide_empty' => false,
+  ));
+  $fallback_location = null;
+  $return_location = null;
+
+  foreach ($locations as $location_term) {
+    $is_delivery_enabled = get_field('is_delivery_enabled', $location_term);
+    //if this location doesn't do delivery, just skip. Currently we don't actually use the 'delivery_location' (e.g. the assigned fulfilment store for this location)
+    //$delivery_location = get_field('delivery_location', $location_term);
+    if (!$is_delivery_enabled) {
+      continue;
+    }
+
+    //If this is the fallback store, assign that to the fallback
+    $is_fallback = get_field('is_fallback', $location_term);
+    if ($is_fallback) {
+      $fallback_location = $location_term->slug;
+    }
+
+    //See if the requested postcode belongs to this store
+    $delivery_postcodes = array_map(function ($pc) {return trim($pc);}, explode("\n", get_field('delivery_postcodes', $location_term)));
+    if (!is_array($delivery_postcodes)) {
+      $delivery_postcodes = [];
+    }
+
+    if (!empty($delivery_postcodes) && in_array($postcode, $delivery_postcodes)) {
+      $return_location = $location_term->slug;
       break;
     }
   }
+
+  if (!$return_location) {
+    $return_location = $fallback_location;
+  }
+
   return $return_location;
 }
 
@@ -216,38 +256,49 @@ function ajax_postcode_search() {
     wp_send_json_error(array('message' => 'Missing query'), 400);
     wp_die();
   }
-  /*$api_key = '63fa7c3657ea97f3809aacaa42142bae';
-  $resp = wp_remote_get('https://auspost.com.au/api/postcode/search.txt?key=' . $api_key . '&q=' . $q . '&limit=10', array(
 
-  ));*/
-  $api_key = 'e6b27996-be38-424e-9d66-14fddc860c34';
-  $api_url = 'https://digitalapi.auspost.com.au/postcode/search.txt?';
-  $query = implode('&', ['q=' . urlencode($q), 'limit=10']);
-  $resp = wp_remote_get($api_url . $query, array(
-    'headers' => [
-      'auth-key' => $api_key,
-    ],
-  ));
-  if (is_wp_error($resp)) {
-    error_log('AusPost fetch failed');
-    wp_send_json_error(array('message' => 'Remote fetch failed'), 500);
-    wp_die();
-  }
-  $rawSuburbs = explode("\n", trim($resp['body']));
-  $suburbs = [];
-  foreach ($rawSuburbs as $rawSuburb) {
-    $parts = explode("|", $rawSuburb);
-    if (count($parts) < 4) {
-      continue;
+  //Try getting from cache first, API calls are slow
+  $cacheKey = 'auspost_api_postcode';
+  $transientKey = $cacheKey . '_' . $q;
+
+  $suburbs = get_transient($transientKey);
+
+  if (!$suburbs) {
+
+    $api_key = 'e6b27996-be38-424e-9d66-14fddc860c34';
+    $api_url = 'https://digitalapi.auspost.com.au/postcode/search.txt?';
+    $query = implode('&', ['q=' . urlencode($q), 'limit=10']);
+    $resp = wp_remote_get($api_url . $query, array(
+      'headers' => [
+        'auth-key' => $api_key,
+      ],
+    ));
+    if (is_wp_error($resp)) {
+      error_log('AusPost fetch failed');
+      wp_send_json_error(array('message' => 'Remote fetch failed'), 500);
+      wp_die();
+    }
+    $content = trim(wp_remote_retrieve_body($resp));
+
+    $rawSuburbs = explode("\n", $content);
+
+    $suburbs = [];
+    foreach ($rawSuburbs as $rawSuburb) {
+      $parts = explode("|", $rawSuburb);
+      if (count($parts) < 4) {
+        continue;
+      }
+
+      $suburbs[] = [
+        'name' => $parts[2],
+        'suburb' => $parts[2],
+        'postcode' => $parts[1],
+        'state' => $parts[3],
+        'location' => postcode_to_location($parts[1]),
+      ];
     }
 
-    $suburbs[] = [
-      'name' => $parts[2],
-      'suburb' => $parts[2],
-      'postcode' => $parts[1],
-      'state' => $parts[3],
-      'location' => postcode_to_location($parts[1]),
-    ];
+    set_transient($transientKey, $suburbs, 60 * 60 * 24 * 3600); // cache for a year. how often to postcodes/suburbs change?
   }
 
   wp_send_json($suburbs);

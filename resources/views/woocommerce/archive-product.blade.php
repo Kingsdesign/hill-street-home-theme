@@ -39,9 +39,15 @@ do_action('woocommerce_before_main_content');
 </div>
 
 
+
 @php
 do_action('woocommerce_archive_description');
 @endphp
+
+
+
+
+
 
 
 

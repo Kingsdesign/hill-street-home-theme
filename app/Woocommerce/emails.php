@@ -80,12 +80,7 @@ add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_ad
 
   if ($method = $order->get_meta('_order_sc_method')) {
     $value = \ucfirst($method);
-    if ($method === 'pickup' && $location) {
-      $location = ucwords(strtolower(implode(" ", explode("-", $location))));
-      $value .= ' from ' . $location;
-    } else if ($method !== 'pickup' && $suburb) {
-      $value .= ' to ' . \ucwords(strtolower($suburb));
-    }
+
     $fields['method'] = ['value' => $value, 'label' => 'Fulfilment'];
   }
   if ($sent_to_admin && $location) {

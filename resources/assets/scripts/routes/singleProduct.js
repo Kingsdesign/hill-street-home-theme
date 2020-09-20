@@ -4,15 +4,15 @@ import scData from "../util/sc-data";
 
 function SingleProduct() {
   const init = () => {
-    console.log("singleProduct init");
+    //console.log("singleProduct init");
   };
 
   const leave = () => {
-    console.log("singleProduct leave");
+    //console.log("singleProduct leave");
   };
 
   const finalize = () => {
-    console.log("singleProduct finalize");
+    //console.log("singleProduct finalize");
 
     //Maybe hide addons
     const isAddonsHidden =

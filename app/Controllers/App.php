@@ -122,7 +122,11 @@ class App extends Controller {
    * Get instagram posts from simple feed
    */
   public function instagram_posts() {
-    // $data = simple_instagram_feed(['ig' => 'hillstreethome']);
+    if (!function_exists('simple_instagram_feed')) {
+      return;
+    }
+
+    $data = simple_instagram_feed(['ig' => 'hillstreethome']);
 
     // if ($data && isset($data['posts']) && !empty($data['posts'])) {
     //   return count($data['posts']) > 6 ? array_slice($data['posts'], 0, 6) : $data['posts'];
