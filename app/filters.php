@@ -309,7 +309,7 @@ function ajax_postcode_search() {
 /**
  * Remove scripts/styles from order-by-location
  */
-//add_filter('wc_obl/enqueue_frontend', '__return_false');
+add_filter('wc_obl/enqueue_frontend', '__return_false');
 
 /**
  * Get cart count

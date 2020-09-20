@@ -493,7 +493,7 @@ add_filter('woocommerce_checkout_fields', function ($fields) {
     unset($fields['order']['time']);
   }
   if (isset($fields['order']['card_message'])) {
-    $fields['order']['card_message']['maxlength'] = 100;
+    $fields['order']['card_message']['maxlength'] = 150;
   }
   return $fields;
 }, 1001, 1);

@@ -38,10 +38,42 @@ ready(() => {
     });
   }
 
-  /*addEventListener("click", ".cfw-next-tab", function (e) {
-    //TODO validations
-    console.log("click", this);
-  });*/
+  // addEventListener("click", ".cfw-next-tab", function (e) {
+  //   //TODO validations
+  //   e.preventDefault();
+  // });
+
+  $(window.cfwEventData.elements.tabContainerElId).on(
+    "easytabs:before",
+    function (event, $clicked, $targetPanel, settings) {
+      const $currentPanel = $(
+        window.cfwEventData.elements.tabContainerElId + " .cfw-panel.active"
+      );
+      if ($currentPanel[0].id === "cfw-customer-info") {
+        var $phone = $currentPanel.find("#phone_field #phone");
+        if ($phone && $phone.get(0) && $phone.parsley().validate() !== true) {
+          return false;
+        }
+
+        var $date = $currentPanel.find("#date_field #date");
+        if ($date && $date.get[0] && $date.parsley().validate() !== true) {
+          return false;
+        }
+
+        var $time = $currentPanel.find('#time_field [name="time"]');
+        var timeValid = true;
+        $time.each(function () {
+          $(this).attr("data-parsley-required", true);
+          if ($(this).parsley().validate() !== true) {
+            timeValid = false;
+          }
+        });
+        if (!timeValid) {
+          return false;
+        }
+      }
+    }
+  );
 
   //Restrict date picker options
   restrictDatePicker();

@@ -50,9 +50,9 @@ $fulfil_parts[] = $fulfil_method === 'pickup' ? 'from' : 'to';
 $fulfil_parts[] = $fulfil_location;
 $fulfil_parts[] = '-';
 $fulfil_parts[] = $fulfil_time ? $fulfil_time : '';
-$fulfil_parts[] = $fulfil_date;
+$fulfil_parts[] = $fulfil_date_fmt;
 ?>
- <p><strong><?php echo ucfirst($fulfil_method); ?>:</strong> <?php echo implode(" ", $fulfil_parts); ?> </p>
+ <p><strong><?php echo ucfirst($fulfil_method); ?></strong> <?php echo implode(" ", $fulfil_parts); ?> </p>
 
 <?php
 

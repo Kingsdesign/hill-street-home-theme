@@ -291,15 +291,15 @@ function hideOverlay() {
 
 function replaceAssets(html) {
   const neverReloadScripts = [
-    "/wp-content/themes/hillsthome/dist/scripts/main.js",
-    "/wp-content/themes/hillsthome/dist/scripts/store-chooser.js",
+    { id: "sage/main.js-js" },
+    { id: "sage/store-chooser.js-js" },
     "/wp-includes/js/admin-bar.min.js",
   ];
   const neverReloadStyles = [
     "/wp-includes/css/dist/block-library/style.min.css",
     "/wp-includes/css/dashicons.min.css",
     "/wp-includes/css/admin-bar.min.css",
-    "/wp-content/themes/hillsthome/dist/styles/main.css",
+    /\/wp-content\/themes\/hillsthome\/dist\/styles\/main(?:_(?:.*?))?\.css$/,
     "https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;1,400&display=swap",
     "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap",
   ];
@@ -354,9 +354,45 @@ function replaceAssets(html) {
   );
 }
 
-const assetInList = (src, array) => {
+const assetInList = ({ src, id = null }, array) => {
   return (
-    array.findIndex((item) => src.substr(item.length * -1) === item) !== -1
+    array.findIndex((item) => {
+      let isRegexp = false;
+      let itemSrc = null;
+      let itemId = null;
+      if (typeof item === "object") {
+        if (item.src) {
+          itemSrc = item.src;
+        }
+        if (item.id) {
+          itemId = item.id;
+        }
+      }
+
+      if (typeof item === "string") {
+        itemSrc = item;
+      } else if (item instanceof RegExp) {
+        itemSrc = item;
+        isRegexp = true;
+      }
+
+      if (!itemSrc && !itemId) return false;
+
+      if (!isRegexp) {
+        if (itemId && id) {
+          return id === itemId;
+        }
+        if (itemSrc) {
+          return src.substr(itemSrc * -1) === itemSrc;
+        }
+      } else {
+        if (itemSrc) {
+          return !!itemSrc.exec(src);
+        }
+      }
+
+      return false;
+    }) !== -1
   );
 };
 
@@ -364,11 +400,11 @@ const shouldSkipAsset = (assetEl, neverReload) => {
   return (
     (assetEl.tagName.toLowerCase() === "script" &&
       assetEl.src &&
-      assetInList(assetEl.src, neverReload)) ||
+      assetInList({ src: assetEl.src, id: assetEl.id }, neverReload)) ||
     assetEl.id === "__bs_script__" ||
     (assetEl.tagName.toLowerCase() === "link" &&
       assetEl.getAttribute("href") &&
-      assetInList(assetEl.getAttribute("href"), neverReload))
+      assetInList({ src: assetEl.getAttribute("href") }, neverReload))
   );
 };
 
