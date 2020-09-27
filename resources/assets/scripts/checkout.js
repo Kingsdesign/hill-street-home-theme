@@ -15,6 +15,7 @@ import {
   endOfDay,
   isSunday,
   isSaturday,
+  format,
 } from "date-fns";
 
 import $ from "jquery";
@@ -179,9 +180,9 @@ function restrictDatePicker() {
     );
   };
 
-  if (data.date_restrictions.restrictions.length) {
-    $(datePicker).datepicker("option", "beforeShowDay", (showDate) => {
-      let isEnabled = true;
+  $(datePicker).datepicker("option", "beforeShowDay", (showDate) => {
+    let isEnabled = true;
+    if (data.date_restrictions.restrictions.length) {
       data.date_restrictions.restrictions.forEach((restriction) => {
         // if (restriction.type !== "disable") return;
         //If the restriction is not for the current method, we don't care
@@ -212,20 +213,35 @@ function restrictDatePicker() {
           return;
         }
       });
+    }
 
-      //CUSTOM restriction for devonport deliveries on sundays
+    // Restrict by day of week
+    if (
+      data.date_restrictions.days &&
+      typeof data.date_restrictions.days[location] !== "undefined" &&
+      typeof data.date_restrictions.days[location][method] !== "undefined"
+    ) {
       if (
-        location === "devonport" &&
-        method === "delivery" &&
-        +cookieData.postcode !== 7310 &&
-        (isSunday(showDate) || isSaturday(showDate))
+        data.date_restrictions.days[location][method].indexOf(
+          format(showDate, "EEEE").toLowerCase()
+        ) > -1
       ) {
         isEnabled = false;
       }
+    }
 
-      return [isEnabled];
-    });
-  }
+    //CUSTOM restriction for devonport deliveries on sundays
+    if (
+      location === "devonport" &&
+      method === "delivery" &&
+      +cookieData.postcode !== 7310 &&
+      (isSunday(showDate) || isSaturday(showDate))
+    ) {
+      isEnabled = false;
+    }
+
+    return [isEnabled];
+  });
 }
 
 function getCookieData() {

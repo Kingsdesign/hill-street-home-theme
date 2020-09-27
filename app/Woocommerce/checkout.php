@@ -248,7 +248,65 @@ function parse_date_restrictions($restrictions) {
   return $restrictions;
 }
 
+/**
+ * Parse the raw day of week order restrictions into something useful
+ * If a setting appears more than once (e.g. for same store & method, the last value will be used)
+ */
+function parse_day_of_week_settings($raw) {
+  //$raw is an array of settings [['location', 'method', 'days']]
+  // we want an object of ['store'=>['method'=>[days]]]?
+
+  $settings = [];
+
+  //Get the location slugs. Will turn r[x]['location'] = {id} into  r[x]['location'] = {slug}
+  $raw = parse_date_restrictions($raw);
+
+  foreach ($raw as $r) {
+    foreach ($r['location'] as $location) {
+      if (!isset($settings[$location])) {
+        $settings[$location] = [];
+      }
+
+      foreach ($r['method'] as $method) {
+        if (!isset($settings[$location][$method])) {
+          $settings[$location][$method] = $r['days'];
+        }
+      }
+    }
+  }
+
+  /*
+  Example output
+  Array
+  (
+  [devonport] => Array
+  (
+  [delivery] => Array
+  (
+  [0] => saturday
+  [1] => sunday
+  )
+
+  )
+
+  [longford] => Array
+  (
+  [delivery] => Array
+  (
+  [0] => thursday
+  [1] => friday
+  )
+
+  )
+
+  )
+   */
+
+  return $settings;
+}
+
 function get_checkout_date_restrictions() {
+  $day_of_week = get_field('order_day_of_week', 'options');
   $defaults = get_field('order_date_defaults', 'options');
   $restrictions = get_field('order_date_restrictions', 'options');
 
@@ -256,7 +314,10 @@ function get_checkout_date_restrictions() {
   $defaults = merge_date_restrictions_with_defaults($defaults, parse_date_restriction_defaults($restrictions));
 
   $restrictions = parse_date_restrictions($restrictions);
-  return ['defaults' => $defaults, 'restrictions' => $restrictions];
+
+  $day_of_week = parse_day_of_week_settings($day_of_week);
+
+  return ['defaults' => $defaults, 'restrictions' => $restrictions, 'days' => $day_of_week];
 }
 
 /**
