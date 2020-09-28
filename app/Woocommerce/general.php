@@ -386,7 +386,7 @@ add_filter('woocommerce_product_is_visible', function ($visible, $product_id) {
     return false;
   }
   return $visible;
-}, 10, 2);
+}, 100, 2);
 add_filter('woocommerce_is_purchasable', function ($purchasable, $product) {
   if (is_admin()) {
     return $purchasable;
@@ -395,7 +395,7 @@ add_filter('woocommerce_is_purchasable', function ($purchasable, $product) {
     return false;
   }
   return $purchasable;
-}, 10, 2);
+}, 100, 2);
 
 /**
  * Helper function to check if product can be shipped

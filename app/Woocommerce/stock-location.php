@@ -40,3 +40,24 @@ add_filter('wp_headers', function ($headers) {
   }
   return $headers;
 }, 10, 1);
+
+/**
+ * Hide stock from some stores
+ * based on stock_location
+ */
+
+add_filter('woocommerce_product_is_visible', '\App\hide_product_by_location', 10, 2);
+add_filter('woocommerce_is_purchasable', '\App\hide_product_by_location', 10, 2);
+
+function hide_product_by_location($purchasable, $product) {
+  if (is_admin()) {
+    return $purchasable;
+  }
+  $sc_data = get_sc_data();
+  $location = isset($sc_data['location']) ? $sc_data['location'] : null;
+
+  if ($location && !has_term($location, 'location', $product_id)) {
+    return false;
+  }
+  return $purchasable;
+}
