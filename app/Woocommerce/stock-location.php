@@ -19,6 +19,7 @@ add_action('woocommerce_new_order', function ($order_id, $order) {
   $location = isset($sc_data['location']) ? $sc_data['location'] : null;
   if ($location) {
     update_post_meta($order_id, '_stock_location', $location);
+    update_post_meta($order_id, '_order_sc_location', $location);
     $note = __(sprintf("Stock location set to: %s", $location));
     // Add the note
     $order->add_order_note($note);
@@ -32,9 +33,10 @@ add_filter('wp_headers', function ($headers) {
   $location = isset($sc_data['location']) ? $sc_data['location'] : null;
   if ($location) {
     $headers['X-WC_STORE_CHOOSER_LOCATION'] = $location;
-    // if (!isset($_COOKIE[wc_sc_cookie_name()]) || $_COOKIE[wc_sc_cookie_name()] !== $location) {
-    //   setcookie(wc_sc_cookie_name(), $location, time() + 60 * 60 * 24 * 365); //365 days expiry
-    //    }
+    $location_cookie_name = wc_sc_cookie_name() . '_location';
+    if (!isset($_COOKIE[$location_cookie_name]) || $_COOKIE[$location_cookie_name] !== $location) {
+      setcookie($location_cookie_name, $location, time() + 60 * 60 * 24 * 365); //365 days expiry
+    }
   }
   return $headers;
 }, 10, 1);
