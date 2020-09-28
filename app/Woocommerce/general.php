@@ -376,6 +376,28 @@ add_action('woocommerce_product_addons_end', function ($post_id) {
 }, 10, 1);
 
 /**
+ * Hide alcohol from devonport
+ */
+add_filter('woocommerce_product_is_visible', function ($visible, $product_id) {
+  if (is_admin()) {
+    return $visible;
+  }
+  if (is_alcohol($product_id) && sc_location_is('devonport')) {
+    return false;
+  }
+  return $visible;
+}, 10, 2);
+add_filter('woocommerce_is_purchasable', function ($purchasable, $product) {
+  if (is_admin()) {
+    return $purchasable;
+  }
+  if (is_alcohol($product->get_id()) && sc_location_is('devonport')) {
+    return false;
+  }
+  return $purchasable;
+}, 10, 2);
+
+/**
  * Helper function to check if product can be shipped
  */
 function is_product_deliverable($product = null) {
@@ -514,6 +536,14 @@ add_filter('woocommerce_related_products', function ($related_posts, $product_id
   return array_diff($related_posts, $exclude_ids);
 }
   , 10, 3);
+
+/**
+ * Helper function to determine whether product is alcohol
+ */
+function is_alcohol($product_id) {
+  $term_slug = 'wine-and-spirits';
+  return has_term($term_slug, 'product_cat', $product_id);
+}
 
 /**
  * Add class to loop items
