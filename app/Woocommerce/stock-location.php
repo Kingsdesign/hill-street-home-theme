@@ -46,17 +46,39 @@ add_filter('wp_headers', function ($headers) {
  * based on stock_location
  */
 
-// add_filter('woocommerce_product_is_visible', '\App\hide_product_by_location', 10, 2);
-// add_filter('woocommerce_is_purchasable', '\App\hide_product_by_location', 10, 2);
+add_filter('woocommerce_product_is_visible', '\App\hide_product_by_location', 1000, 2);
+add_filter('woocommerce_is_purchasable', '\App\hide_product_by_location', 1000, 2);
 
-function hide_product_by_location($purchasable, $product) {
+/**
+ * hide_product_by_location
+ *
+ * Hide products based on 'location' term
+ *
+ * sometimes product_or_id is a product (or variation) object sometimes its a number
+ */
+function hide_product_by_location($purchasable, $product_or_id) {
   if (is_admin()) {
     return $purchasable;
   }
+
+  // Get a numeric id.
+  $product_id = \is_numeric($product_or_id) ? $product_or_id : null;
+  if (!$product_id && is_object($product_or_id)) {
+    if (method_exists($product_or_id, 'get_parent_id')) {
+      $product_id = $product_or_id->get_parent_id();
+    } else if (method_exists($product_or_id, 'get_id')) {
+      $product_id = $product_or_id->get_id();
+    }
+  }
+
+  if (!$product_id) {
+    return $purchasable;
+  }
+
   $sc_data = get_sc_data();
   $location = isset($sc_data['location']) ? $sc_data['location'] : null;
 
-  if ($location && !has_term($location, 'location', $product_id)) {
+  if (!empty($location) && has_term($location, 'location', $product_id) !== true && !empty(get_the_terms($product_id, 'location'))) {
     return false;
   }
   return $purchasable;
