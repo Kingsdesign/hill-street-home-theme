@@ -46,8 +46,8 @@ add_filter('wp_headers', function ($headers) {
  * based on stock_location
  */
 
-add_filter('woocommerce_product_is_visible', '\App\hide_product_by_location', 10, 2);
-add_filter('woocommerce_is_purchasable', '\App\hide_product_by_location', 10, 2);
+// add_filter('woocommerce_product_is_visible', '\App\hide_product_by_location', 10, 2);
+// add_filter('woocommerce_is_purchasable', '\App\hide_product_by_location', 10, 2);
 
 function hide_product_by_location($purchasable, $product) {
   if (is_admin()) {
