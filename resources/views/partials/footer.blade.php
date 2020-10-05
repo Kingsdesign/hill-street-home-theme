@@ -22,12 +22,64 @@
       <div class="px-4 w-full md:w-1/2 lg:w-1/4 mb-12">
         <h3 class="text-2xl mb-6">Contact</h3>
         <p><strong>Phone</strong></p>
-        <p>West Hobart <a href="tel:0362346849">(03) 6234 6849</a></p>
-        <p>Devonport <a href="tel:0362346849">(03) 6127 5355</a></p>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <p>West Hobart</p>
+              </td>
+              <td>
+                <a href="tel:0362346849">(03) 6234 6849</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p>Devonport</p>
+              </td>
+              <td>
+                <a href="tel:0362346849">(03) 6127 5355</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p>Sandy Bay</p>
+              </td>
+              <td>
+                <a href="tel:0362404881">(03) 6240 4881</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <div class="mb-6"></div>
         <p><strong>Email</strong></p>
-        <p>West Hobart <a href="mailto:hampers@hillstreetgrocer.com">hampers@hillstreetgrocer.com</a></p>
-        <p>Devonport <a href="mailto:home.devonport@hillstreetgrocer.com">home.devonport@hillstreetgrocer.com</a></p>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <p>West Hobart</p>
+              </td>
+              <td>
+                <a href="mailto:hampers@hillstreetgrocer.com">hampers@hillstreetgrocer.com</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p>Devonport</p>
+              </td>
+              <td>
+                <a href="mailto:home.devonport@hillstreetgrocer.com">home.devonport@hillstreetgrocer.com</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p>Sandy Bay</p>
+              </td>
+              <td>
+                <a href="mailto:home.sandybay@hillstreetgrocer.com">home.sandybay@hillstreetgrocer.com</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
         <div class="border-b border-solid border-white mx-12 py-8 md:hidden"></div>
       </div>
       <div class="px-4 w-full md:w-1/2 lg:w-1/4 mb-12">

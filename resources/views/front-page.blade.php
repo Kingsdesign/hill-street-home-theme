@@ -51,21 +51,28 @@
 </div>
 
 <div class="md:grid contact-block grid-cols-2 grid-rows-2">
-  <div class="bg-gray-100 flex items-center justify-center py-8 px-4 col-start-1">
+  <div class="bg-gray-100 flex items-center justify-center py-6 px-4 col-start-1">
     <div>
-      <h3 class="text-2xl mb-6">West Hobart</h3>
+      <h3 class="text-2xl mb-4">West Hobart</h3>
       <p class="mb-3"><strong>Address</strong><br>70 Arthur St, West Hobart TAS 7000</p>
       <p class="mb-3"><strong>Phone</strong><br><a href="tel:62346849" class="initial-none">(03) 6234 6849</a></p>
     </div>
   </div>
-  <div class="bg-gray-200 flex items-center justify-center py-8 px-4 col-start-1">
+  <div class="bg-gray-200 flex items-center justify-center py-6 px-4 col-start-1">
     <div>
-      <h3 class="text-2xl mb-6">Devonport</h3>
+      <h3 class="text-2xl mb-4">Devonport</h3>
       <p class="mb-3"><strong>Address</strong><br>42/54 Oldaker St, Devonport TAS 7310</p>
       <p class="mb-3"><strong>Phone</strong><br><a href="tel:0361275355" class="initial-none">(03) 6127 5355</a></p>
     </div>
   </div>
-  <div class="row-start-1 col-start-2 row-span-2 bg-cover bg-center h-64 md:h-auto"
+  <div class="bg-gray-100 flex items-center justify-center py-6 px-4 col-start-1">
+    <div>
+      <h3 class="text-2xl mb-4">Sandy Bay</h3>
+      <p class="mb-3"><strong>Address</strong><br>2 Churchill Ave, Sandy Bay TAS 7005</p>
+      <p class="mb-3"><strong>Phone</strong><br><a href="tel:0362404881" class="initial-none">(03) 6240 4881</a></p>
+    </div>
+  </div>
+  <div class="row-start-1 col-start-2 row-span-3 bg-cover bg-center h-64 md:h-auto"
     style="background-image: url(@php echo wp_get_attachment_image_src( 54, 'large')[0] @endphp)">
   </div>
 </div>
