@@ -73,6 +73,7 @@ function renderDomData() {
     suburb_display: ucWords(suburb),
     location_display: ucWords(deslugify(location)),
   };
+
   Array.from(document.querySelectorAll("[data-sc-val]")).forEach((el) => {
     if (el.tagName === "input") {
       el.value = _d[el.dataset.scVal];

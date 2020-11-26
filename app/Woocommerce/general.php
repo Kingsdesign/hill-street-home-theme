@@ -400,31 +400,19 @@ add_filter('woocommerce_is_purchasable', function ($purchasable, $product) {
 /**
  * Helper function to check if product can be shipped
  */
-function is_product_deliverable($product = null) {
-  global $post;
-  if ($product === null) {
-    $product = $post; //\wc_get_product($post);
-  }
-  if (!$product) {
+function is_undeliverable_user() {
+  $sc_data = get_sc_data();
+  if (empty($sc_data)) {
     return false;
   }
 
-  if (!has_term('fresh', 'product_cat', $product) && !has_term('flowers', 'product_cat', $product)) {
-    return true;
-  }
-
-  $sc_data = get_sc_data();
-  if (empty($sc_data)) {
-    return true;
-  }
-
   if (empty($sc_data['method']) || empty($sc_data['postcode']) || empty($sc_data['suburb'])) {
-    return true;
+    return false;
   }
 
 //Only apply to delivery
   if (sc_method_is('pickup')) {
-    return true;
+    return false;
   }
 
 //Exclude mainland postcodes
@@ -452,7 +440,22 @@ function is_product_deliverable($product = null) {
     }
   }
 
-  return !(!$is_tasmania || !$is_good_postcode || $is_bad_suburb);
+  return (!$is_tasmania || !$is_good_postcode || $is_bad_suburb);
+}
+function is_product_deliverable($product = null) {
+  global $post;
+  if ($product === null) {
+    $product = $post; //\wc_get_product($post);
+  }
+  if (!$product) {
+    return false;
+  }
+
+  if (!has_term('fresh', 'product_cat', $product) && !has_term('flowers', 'product_cat', $product)) {
+    return true;
+  }
+
+  return !is_undeliverable_user();
 }
 
 function ajax_is_product_deliverable() {
@@ -466,6 +469,59 @@ function ajax_is_product_deliverable() {
 
 add_action('wp_ajax_product_deliverable', __NAMESPACE__ . '\\ajax_is_product_deliverable');
 add_action('wp_ajax_nopriv_product_deliverable', __NAMESPACE__ . '\\ajax_is_product_deliverable');
+
+/** Hide from shop if not deliverable */
+add_action('woocommerce_product_query', function ($q) {
+
+  if (is_undeliverable_user()) {
+    $tax_query = (array) $q->get('tax_query');
+
+    $tax_query[] = array(
+      'taxonomy' => 'product_cat',
+      'field' => 'slug',
+      'terms' => array('fresh', 'flowers'),
+      'operator' => 'NOT IN',
+    );
+
+    $q->set('tax_query', $tax_query);
+  }
+
+  return $q;
+
+});
+// add_filter('woocommerce_product_is_visible', function ($visible, $product_id) {
+//   if (!$visible) {
+//     return $visible;
+//   }
+
+//   return is_product_deliverable($product_id);
+// }, 10, 2);
+
+// Hide categories with no visible products
+add_filter('woocommerce_get_product_subcategories_cache_key', function ($key, $parent_id) {
+  $sc_data = get_sc_data();
+  if (!empty($sc_data) && isset($sc_data['postcode'])) {
+    $key .= '-' . $sc_data['method'] . '-' . $sc_data['postcode'];
+  }
+  return $key;
+}, 10, 2);
+add_filter('get_terms', function ($terms, $taxonomies, $args) {
+
+// // if it is a product category and on the shop page
+  if (in_array('product_cat', $taxonomies) && !is_admin()) {
+    if (is_undeliverable_user()) {
+      $new_terms = [];
+      foreach ($terms as $key => $term) {
+        if (!($term->slug === 'fresh' || $term->slug === 'flowers')) {
+          $new_terms[] = $term;
+        }
+      }
+      $terms = $new_terms;
+    }
+  }
+  return $terms;
+
+}, 10, 3);
 
 /**
  * Hide add to cart, and show message if its a no fresh
