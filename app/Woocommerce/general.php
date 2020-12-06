@@ -473,6 +473,10 @@ add_action('wp_ajax_nopriv_product_deliverable', __NAMESPACE__ . '\\ajax_is_prod
 /** Hide from shop if not deliverable */
 add_action('woocommerce_product_query', function ($q) {
 
+  if (is_admin()) {
+    return $q;
+  }
+
   if (is_undeliverable_user()) {
     $tax_query = (array) $q->get('tax_query');
 
@@ -512,7 +516,7 @@ add_filter('get_terms', function ($terms, $taxonomies, $args) {
     if (is_undeliverable_user()) {
       $new_terms = [];
       foreach ($terms as $key => $term) {
-        if (!($term->slug === 'fresh' || $term->slug === 'flowers')) {
+        if (is_object($term) && !($term->slug === 'fresh' || $term->slug === 'flowers')) {
           $new_terms[] = $term;
         }
       }
@@ -612,3 +616,14 @@ add_filter('product_cat_class', function ($classes, $class, $category) {
   $classes[] = 'product-category--' . esc_attr($category->slug);
   return $classes;
 }, 10, 3);
+
+/**
+ * Add message about quantity and addons
+ */
+add_action('woocommerce_after_add_to_cart_quantity', function () {
+  if (($text = get_field('add_on_quantity_notice', 'options')) && !empty($text)):
+  ?>
+  <div class="text-sm text-gray-600 mt-3 mb-5"><?php echo $text; ?></div>
+  <?php
+endif;
+}, 999);

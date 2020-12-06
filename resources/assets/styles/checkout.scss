@@ -107,12 +107,28 @@
 }
 
 .card-message-maxlength {
-  color: #718096;
-  font-size: 0.85rem;
-  margin-left: 1rem;
-  margin-top: 0.25rem;
+  
 
   &.card-message-maxlength--invalid {
     color: #e53e3e;
+  }
+}
+
+
+.formHelp {
+color: #718096;
+font-size: 0.85rem;
+margin-left: 1rem;
+margin-top: 0.25rem;
+}
+
+.shipping-methods-disclaimer {
+  @apply text-sm;
+
+  ul {
+    @apply list-inside;
+    li {
+      @apply mb-1;
+    }
   }
 }

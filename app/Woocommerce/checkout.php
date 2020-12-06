@@ -338,9 +338,11 @@ add_action('wp_footer', function () {
   echo 'var custom_checkout_data = ' . json_encode($data);
   echo "\n/* ]]> */\n</script>";
   wp_enqueue_script('sage/checkout.js', asset_path('scripts/checkout.js'), array(), null, false);
+  wp_localize_script('sage/checkout.js', 'hsh_checkout', array('fulfilment_date_disclaimer' =>
+    get_field('fulfilment_date_disclaimer', 'options'),
+  ));
   wp_print_scripts('sage/checkout.js');
-  //wp_localize_script('sage/checkout.js', 'custom_checkout_data', array('cookie_name' => \WC_OrderByLocation::$location_var_name));
-  //}
+  // }
   //WARNING HAX
   // This forces checkout-wc not to validate shipping fields on customer info tab
   /*echo '<script>(function(w){
@@ -644,3 +646,13 @@ cfw_thank_you_section_auto_wrap('cfw_thank_you_order_updates', 'cfw-order-update
 }
 }, 60, 1
 );*/
+
+add_action('woocommerce_review_order_after_shipping', function () {
+  ?>
+  <tr>
+  <td class="shipping-methods-disclaimer">
+    <?php echo get_field('shipping_methods_disclaimer', 'options'); ?>
+  </td>
+  </tr>
+  <?php
+});

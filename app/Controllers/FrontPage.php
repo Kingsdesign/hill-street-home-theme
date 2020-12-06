@@ -15,6 +15,60 @@ class FrontPage extends Controller {
     return false;
   }
 
+  public function grid() {
+    $grid = get_field('homepage_grid', 'options');
+    if (empty($grid)) {
+      return '';
+    }
+
+    $columns = 3;
+
+    wc_set_loop_prop('columns', $columns);
+    wc_set_loop_prop('is_shortcode', true);
+
+    $output = '';
+
+    ob_start();
+    woocommerce_product_loop_start();
+    $output .= ob_get_clean();
+
+    foreach ($grid as $gridItem) {
+      if ($gridItem['acf_fc_layout'] === 'product_category' && !empty($gridItem['category'])) {
+        ob_start();
+        foreach ($gridItem['category'] as $category) {
+          wc_get_template(
+            'content-product_cat.php',
+            array(
+              'category' => get_term($category),
+            )
+          );
+        }
+        $output .= \ob_get_clean();
+      }
+      if ($gridItem['acf_fc_layout'] === 'link') {
+        $output .= \App\template('partials.home-grid-item', $gridItem);
+      }
+    }
+
+    //Inject our buttons
+    ob_start();
+    $shop_page_url = App::relative_url(get_permalink(wc_get_page_id('shop')));
+    echo '<li class="product-category product buttons md:col-span-3 md:grid md:grid-cols-2 md:gap-4 md:pt-6">';
+    echo '<span class="block"><a class="flex items-center justify-center" href="' . esc_url($shop_page_url) . '"><span>Shop all</span></a></span>';
+    echo '<span class="block"><button class="flex items-center justify-center" data-modal-trigger="modal-search"><span>Search</span></button></span>';
+    echo '</li>';
+    $output .= ob_get_clean();
+
+    ob_start();
+    woocommerce_product_loop_end();
+    $output .= \ob_get_clean();
+
+    woocommerce_reset_loop();
+
+    return '<div class="woocommerce columns-' . $columns . '">' . $output . '</div>';
+
+  }
+
   public function categories() {
     $categories = get_field('homepage_categories', 'options');
     if (!empty($categories)) {

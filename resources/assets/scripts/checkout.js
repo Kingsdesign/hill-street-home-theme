@@ -84,7 +84,20 @@ ready(() => {
   initValidateDate();
 
   initCardMessage();
+  addFulfilmentDateDisclaimer();
 });
+
+function addFulfilmentDateDisclaimer() {
+  const fulfilmentDateField = document.querySelector(
+    ".cfw-input-wrap-row #date_field"
+  );
+  if (!fulfilmentDateField) return;
+  const el = document.createElement("div");
+  el.classList.add("fulfilment-date-disclaim");
+  el.classList.add("formHelp");
+  el.innerHTML = window.hsh_checkout.fulfilment_date_disclaimer;
+  fulfilmentDateField.appendChild(el);
+}
 
 function initCardMessage() {
   const cardMessageField = document.getElementById("card_message_field");
@@ -99,6 +112,7 @@ function initCardMessage() {
 
   const cardMessageDisplay = document.createElement("div");
   cardMessageDisplay.className = "card-message-maxlength";
+  cardMessageDisplay.classList.add("formHelp");
   const cardMessageDisplayText = (length) =>
     `${length}/${maxlength} characters`;
 

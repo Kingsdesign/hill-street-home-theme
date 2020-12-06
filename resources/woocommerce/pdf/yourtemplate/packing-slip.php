@@ -51,7 +51,7 @@ $fulfil_date_fmt = $fulfil_date ? $fulfil_date->format('F j, Y') : "";
 $fulfil_time = $this->order->get_meta('time');
 ?>
 		<p style="font-size: 10pt; margin-bottom: 5mm;">
-		<?php echo ucfirst($fulfil_method); ?>: <?php echo $fulfil_time ? $fulfil_time . ", " : ""; ?><?php echo $fulfil_date_fmt; ?>
+		Preferred <?php echo ucfirst($fulfil_method); ?>: <?php echo $fulfil_time ? $fulfil_time . ", " : ""; ?><?php echo $fulfil_date_fmt; ?>
 		</p>
 		<?php // END MODIFICATION ?>
 
@@ -114,20 +114,20 @@ $fulfil_time = $this->order->get_meta('time');
 	</thead>
 	<tbody>
 		<?php $items = $this->get_order_items();if (sizeof($items) > 0): foreach ($items as $item_id => $item): ?>
-									<tr class="<?php echo apply_filters('wpo_wcpdf_item_row_class', $item_id, $this->type, $this->order, $item_id); ?>">
-										<td class="product">
-											<?php $description_label = __('Description', 'woocommerce-pdf-invoices-packing-slips'); // registering alternate label translation ?>
-											<span class="item-name"><?php echo $item['name']; ?></span>
-											<?php do_action('wpo_wcpdf_before_item_meta', $this->type, $item, $this->order);?>
-											<span class="item-meta"><?php echo $item['meta']; ?></span>
-											<dl class="meta">
-												<?php $description_label = __('SKU', 'woocommerce-pdf-invoices-packing-slips'); // registering alternate label translation ?>
-												<?php // MODIFICATION: remove sku
+										<tr class="<?php echo apply_filters('wpo_wcpdf_item_row_class', $item_id, $this->type, $this->order, $item_id); ?>">
+											<td class="product">
+												<?php $description_label = __('Description', 'woocommerce-pdf-invoices-packing-slips'); // registering alternate label translation ?>
+												<span class="item-name"><?php echo $item['name']; ?></span>
+												<?php do_action('wpo_wcpdf_before_item_meta', $this->type, $item, $this->order);?>
+												<span class="item-meta"><?php echo $item['meta']; ?></span>
+												<dl class="meta">
+													<?php $description_label = __('SKU', 'woocommerce-pdf-invoices-packing-slips'); // registering alternate label translation ?>
+													<?php // MODIFICATION: remove sku
   /*
   <?php if (!empty($item['sku'])): ?><dt class="sku"><?php _e('SKU:', 'woocommerce-pdf-invoices-packing-slips');?></dt><dd class="sku"><?php echo $item['sku']; ?></dd><?php endif;?>
    */
   //END MODIFICATION ?>
-										<?php if (!empty($item['weight'])): ?><dt class="weight"><?php _e('Weight:', 'woocommerce-pdf-invoices-packing-slips');?></dt><dd class="weight"><?php echo $item['weight']; ?><?php echo get_option('woocommerce_weight_unit'); ?></dd><?php endif;?>
+											<?php if (!empty($item['weight'])): ?><dt class="weight"><?php _e('Weight:', 'woocommerce-pdf-invoices-packing-slips');?></dt><dd class="weight"><?php echo $item['weight']; ?><?php echo get_option('woocommerce_weight_unit'); ?></dd><?php endif;?>
 				</dl>
 				<?php do_action('wpo_wcpdf_after_item_meta', $this->type, $item, $this->order);?>
 			</td>

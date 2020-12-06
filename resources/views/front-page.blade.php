@@ -32,10 +32,17 @@
 <div class="container">
 
   <div class="product-grid py-12 md:py-20">
-    @if($categories)
+    {{-- @if($categories) --}}
     {{--@php echo do_shortcode( '[product_categories columns=3 ids="'.implode(",",$categories).'"]' ) @endphp --}}
-    {!! FrontPage::product_categories($categories, ['columns'=>3])!!}
-    @endif
+    {{-- {!! FrontPage::product_categories($categories, ['columns'=>3])!!} --}}
+    {{-- @endif --}}
+
+    {{-- @foreach($grid as $gridItem) --}}
+
+    {{-- @endforeach --}}
+
+    {!! FrontPage::grid()!!}
+
   </div>
 </div>
 

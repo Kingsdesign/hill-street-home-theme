@@ -17,3 +17,16 @@
   }
 
 }
+
+
+.gform_wrapper {
+  // Text
+  input:not([type=radio]):not([type=checkbox]):not([type=submit]):not([type=button]):not([type=image]):not([type=file]) {
+    @apply border border-solid border-gray-600 px-3 py-1;
+  }
+
+  .chosen-container .chosen-choices {
+    @apply border border-solid border-gray-600 px-3 py-1;
+    background-image: none;
+  }
+}
