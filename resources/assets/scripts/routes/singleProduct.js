@@ -16,7 +16,8 @@ function SingleProduct() {
 
     //Maybe hide addons
     const isAddonsHidden =
-      scData("location") === "devonport" &&
+      (scData("location") === "devonport" ||
+        scData("location") === "sandy-bay") &&
       window.main_data &&
       window.main_data.single_product &&
       window.main_data.single_product.hide_addons;

@@ -11,7 +11,7 @@ add_filter('gform_admin_pre_render_1', __NAMESPACE__ . '\\gform_populate_product
 
 function gform_populate_product_select($form) {
 
-  if ($form['id'] !== 1) {
+  if ($form['id'] !== 1 || is_admin()) {
     return $form;
   }
 

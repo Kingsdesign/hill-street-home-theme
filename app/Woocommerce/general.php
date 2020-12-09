@@ -376,13 +376,13 @@ add_action('woocommerce_product_addons_end', function ($post_id) {
 }, 10, 1);
 
 /**
- * Hide alcohol from devonport
+ * Hide alcohol from devonport & sandybay
  */
 add_filter('woocommerce_product_is_visible', function ($visible, $product_id) {
   if (is_admin()) {
     return $visible;
   }
-  if (is_alcohol($product_id) && sc_location_is('devonport')) {
+  if (is_alcohol($product_id) && (sc_location_is('devonport') || sc_location_is('sandy-bay'))) {
     return false;
   }
   return $visible;
@@ -391,7 +391,7 @@ add_filter('woocommerce_is_purchasable', function ($purchasable, $product) {
   if (is_admin()) {
     return $purchasable;
   }
-  if (is_alcohol($product->get_id()) && sc_location_is('devonport')) {
+  if (is_alcohol($product->get_id()) && (sc_location_is('devonport') || sc_location_is('sandy-bay'))) {
     return false;
   }
   return $purchasable;
