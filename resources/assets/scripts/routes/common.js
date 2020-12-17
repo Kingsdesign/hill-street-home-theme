@@ -41,6 +41,35 @@ function diffScripts(currentScripts, newScripts) {
 const observer = lozad();
 let routes;
 
+function siteNotice() {
+  const localStorageKey = "hsh-site-notice";
+  const notice = document.querySelector(".site-notice");
+  if (!notice) return;
+
+  const noticeId = notice.getAttribute("data-id");
+  if (noticeId === localStorage.getItem(localStorageKey)) {
+    notice.remove();
+    return;
+  }
+
+  notice.classList.remove("hidden");
+  addEventListener("click", ".site-notice .site-notice-dismiss", function (e) {
+    e.preventDefault();
+    notice.remove();
+    localStorage.setItem(localStorageKey, noticeId);
+    document.body.style.marginTop = 0;
+  });
+
+  if (notice.classList.contains("fixed")) {
+    document.body.style.marginTop =
+      notice.getBoundingClientRect().height + "px";
+  }
+}
+
+function commonFinalize() {
+  siteNotice();
+}
+
 export default {
   init() {
     //let currentScripts = null;
@@ -99,6 +128,8 @@ export default {
         routes.loadEvents();
 
         trigger("hsh-fe::after_enter", document);
+
+        commonFinalize();
       });
       //cl.responsive();
     });
