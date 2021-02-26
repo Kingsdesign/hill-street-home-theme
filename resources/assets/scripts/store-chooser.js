@@ -142,6 +142,11 @@ function renderDomData() {
       (method === "pickup" ? _d.location_display : _d.suburb_display);
     el.innerHTML = str;
   });
+
+  // Cloak
+  Array.from(document.querySelectorAll("[data-sc-cloak]")).forEach((el) => {
+    el.removeAttribute("data-sc-cloak");
+  });
 }
 
 /**

@@ -77,8 +77,11 @@ ready(() => {
     }
   );
 
+  setTimeout(() => {
+    restrictDatePicker();
+  });
+
   //Restrict date picker options
-  restrictDatePicker();
   //$("#date.date-picker").datepicker("option", "minDate", new Date(2007, 1 - 1, 1));
 
   initValidateDate();

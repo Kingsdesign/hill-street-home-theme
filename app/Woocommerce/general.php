@@ -627,3 +627,18 @@ add_action('woocommerce_after_add_to_cart_quantity', function () {
   <?php
 endif;
 }, 999);
+
+/**
+ * Force store chooser
+ */
+
+add_action('woocommerce_before_add_to_cart_button', function () {
+  echo '<div class="maybe-show-add-to-cart" data-sc-if="%location%" data-sc-cloak>';
+});
+add_action('woocommerce_after_add_to_cart_button', function () {
+  echo '</div>';
+  echo '<div data-sc-else class="maybe-show-add-to-cart--no-location" data><button type="button" data-sc-show class="block w-full bg-blue-50 border border-solid border-gray-300 px-3 py-4 my-3 text-center">';
+  echo '<p class="underline">Set your store to add to cart</p>
+  <noscript><p>This site requires javascript. Please enable javascript to add to cart.</p></noscript>';
+  echo '</button></div>';
+});

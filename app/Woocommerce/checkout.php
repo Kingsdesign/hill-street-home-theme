@@ -656,3 +656,124 @@ add_action('woocommerce_review_order_after_shipping', function () {
   </tr>
   <?php
 });
+
+/**
+ * Server side validate fulfilment date
+ */
+add_action('woocommerce_after_checkout_validation', function ($fields, $errors) {
+
+  $sc_data = get_sc_data();
+  $date = isset($fields['date']) ? $fields['date'] : null;
+
+  if (!$date) {
+    $errors->add('date_required', '<strong>Date</strong> is a required field');
+  }
+  if (!$sc_data || !isset($sc_data['method'])) {
+    $errors->add('method_required', '<strong>Pickup/delivery</strong> is not specified. Please open the store choose and select store &amp; method.');
+  }
+
+  if ($date) {
+    validate_fulfilment_date($date, $errors);
+  }
+
+}, 10, 2);
+
+function validate_fulfilment_date($date_string, &$errors) {
+
+  $sc_data = get_sc_data();
+
+  try {
+    $date = \DateTimeImmutable::createFromFormat("F j, Y H:i", $date_string . " 00:00", wp_timezone());
+  } catch (Exception $e) {
+    $errors->add('date_invalid', '<strong>Date</strong> is an invalid date.');
+    return;
+  }
+
+  $restrictions = get_checkout_date_restrictions();
+
+  $date_day_of_week = strtolower($date->format('l'));
+
+  // Test the days setting
+  foreach ($restrictions['days'] as $location => $restriction) {
+    if ($location === $sc_data['location'] && isset($restriction[$sc_data['method']]) && array_search($date_day_of_week, $restriction[$sc_data['method']]) !== false) {
+      $errors->add('date_mindate', '<strong>Date</strong>: your selected pickup/delivery date is no longer available.');
+      break;
+    }
+  }
+
+  // Get the default for the location & method
+  $defaultSetting = isset($restrictions['defaults'][$sc_data['location']][$sc_data['method']]) ? $restrictions['defaults'][$sc_data['location']][$sc_data['method']] : null;
+
+  // Merge 'modify' type restrictions
+  foreach ($restrictions['restrictions'] as $restriction) {
+    // If is for this location
+    if ($restriction['type'] !== 'modify' || array_search($sc_data['location'], $restriction['location']) === false || array_search($sc_data['method'], $restriction['method']) === false) {
+      continue;
+    }
+
+    $now = new \DateTimeImmutable("now", wp_timezone());
+    $date_start = \DateTimeImmutable::createFromFormat("Y-m-d H:i", $restriction['date'] . " 00:00", wp_timezone());
+    $date_end = ($restriction['end_date'] ? \DateTimeImmutable::createFromFormat("Y-m-d H:i", $restriction['end_date'] . " 00:00", wp_timezone()) : $date_start)->add(new \DateInterval("P1D"));
+    if ($now >= $date_start && $now < $date_end) {
+      $defaultSetting['day_offset'] = $restriction['day_offset'];
+      $defaultSetting['time_cutoff'] = $restriction['time_cutoff'];
+    }
+  }
+
+  // The default setting gives us the min date, which otherwise is today
+  $minDate = new \DateTimeImmutable("now", wp_timezone());
+  $minDate->setTime(0, 0);
+  if ($defaultSetting) {
+    $minDate = get_fulfilment_date_min_date($defaultSetting, $minDate);
+  }
+
+  // Test the min date
+  if ($date < $minDate) {
+    $errors->add('date_mindate', '<strong>Date</strong>: your selected pickup/delivery date is no longer available.');
+    return;
+  }
+
+  //Next test the restrictions
+  foreach ($restrictions['restrictions'] as $restriction) {
+    // If is for this location
+    if (array_search($sc_data['location'], $restriction['location']) === false || array_search($sc_data['method'], $restriction['method']) === false) {
+      continue;
+    }
+
+    // If $date is between start_date and end_date
+    $date_start = \DateTimeImmutable::createFromFormat("Y-m-d H:i", $restriction['date'] . " 00:00", wp_timezone());
+    $date_end = ($restriction['end_date'] ? \DateTimeImmutable::createFromFormat("Y-m-d H:i", $restriction['end_date'] . " 00:00", wp_timezone()) : $date_start)->add(new \DateInterval("P1D"));
+    if ($date >= $date_start && $date < $date_end) {
+      if ($restriction['type'] === 'disable') {
+        $errors->add('date_mindate', '<strong>Date</strong>: your selected pickup/delivery date is no longer available.');
+        break;
+      }
+    }
+  }
+
+}
+
+function get_fulfilment_date_min_date($defaultSetting, $minDate) {
+  $min_date_offset = intval($defaultSetting['day_offset']);
+
+  $min_date_cutoff = $defaultSetting['time_cutoff'];
+
+  $now = new \DateTimeImmutable("now", wp_timezone());
+
+  $cutoff_date = new \DateTime("now", wp_timezone());
+
+  if ($min_date_cutoff && preg_match("/^\d{2}:\d{2}/", $min_date_cutoff)) {
+    $min_date_cutoff_parts = explode(":", $min_date_cutoff);
+
+    $cutoff_date->setTime(intval($min_date_cutoff_parts[0]), intval($min_date_cutoff_parts[1]));
+  }
+
+  if ($now > $cutoff_date) {
+    $min_date_offset += 1;
+  }
+  $minDate = \DateTime::createFromImmutable($minDate);
+  $minDate->add(new \DateInterval("P" . $min_date_offset . "D"));
+  $minDate->setTime(0, 0);
+
+  return $minDate;
+}

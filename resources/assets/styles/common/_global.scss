@@ -89,3 +89,8 @@ button {
 .container-fluid {
   @apply px-2;
 }
+
+
+[data-sc-cloak] {
+  @apply hidden;
+}

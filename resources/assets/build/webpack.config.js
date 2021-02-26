@@ -25,6 +25,7 @@ let webpackConfig = {
     filename: `scripts/${assetsFilenames}.js`,
   },
   stats: {
+    assets: false,
     hash: false,
     version: false,
     timings: false,
