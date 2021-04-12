@@ -107,19 +107,16 @@
 }
 
 .card-message-maxlength {
-  
-
   &.card-message-maxlength--invalid {
     color: #e53e3e;
   }
 }
 
-
 .formHelp {
-color: #718096;
-font-size: 0.85rem;
-margin-left: 1rem;
-margin-top: 0.25rem;
+  color: #718096;
+  font-size: 0.85rem;
+  margin-left: 1rem;
+  margin-top: 0.25rem;
 }
 
 .shipping-methods-disclaimer {
@@ -130,5 +127,18 @@ margin-top: 0.25rem;
     li {
       @apply mb-1;
     }
+  }
+}
+
+.cfw-input-wrap input[type="email"],
+.cfw-input-wrap input[type="number"],
+.cfw-input-wrap input[type="password"],
+.cfw-input-wrap input[type="tel"],
+.cfw-input-wrap input[type="text"],
+.cfw-input-wrap select,
+.cfw-input-wrap textarea {
+  &:disabled {
+    opacity: 0.7;
+    @apply text-gray-500;
   }
 }

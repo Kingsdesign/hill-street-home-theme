@@ -7,8 +7,10 @@ import autoComplete from "@tarekraafat/autocomplete.js";
 import ModalService from "./services/modalService";
 import { ucWords, ucFirst, deslugify } from "./util/string-helpers";
 import { ready, addEventListener, removeEventListener } from "./util/dom-help";
-import barba from "@barba/core";
+// import barba from "@barba/core";
 import throttle from "./util/throttle";
+
+const barba = window.barba;
 
 const Cookies = window.Cookies;
 const data = window.store_chooser_data;
@@ -32,6 +34,7 @@ let method = "";
 let postcode = "";
 let suburb = "";
 let location = "";
+let state = "";
 
 if (cookieData) {
   if (cookieData.method) method = cookieData.method;
@@ -40,6 +43,7 @@ if (cookieData) {
     postcode = cookieData.postcode;
   }
   if (cookieData.location) location = cookieData.location;
+  if (cookieData.state) state = cookieData.state;
 }
 
 let initialRender = false;
@@ -47,9 +51,13 @@ ready(() => {
   maybeShowModal();
 
   //Bind data
-  barba.hooks.afterEnter(renderDomData());
-  if (!initialRender) renderDomData();
+  barba.hooks.afterEnter(() => renderDomData());
+  // if (!initialRender) {
+  // console.log("render dom data");
+  // renderDomData();
+  // }
 
+  // console.log("render dom data");
   //Event listeners
   bindEvents();
 });
@@ -110,6 +118,7 @@ function renderDomData() {
     } catch (e) {
       conditionResult = false;
     }
+
     if (!conditionResult) {
       el.style.display = "none";
     } else {
@@ -164,6 +173,7 @@ function haveRequiredData() {
   if (method === "pickup" && !location) return false;
   if (method === "delivery" && (!location || !postcode || !suburb))
     return false;
+  if (!state) return false;
   return true;
 }
 
@@ -197,13 +207,14 @@ const saveForm = () => {
       location,
       suburb,
       postcode,
+      state,
     });
     return;
   }
 
   Cookies.set(
     cookieName,
-    { method, suburb, postcode, location },
+    { method, suburb, postcode, location, state },
     { expires: 365 }
   );
   Cookies.set(cookieName + "_location", location, { expires: 365 }); // we also set the cookie name + location to just the location for use with the cache key
@@ -217,7 +228,7 @@ const saveForm = () => {
  * MODAL EVENT HANDLERS
  */
 const onSavePostcode = () => {
-  if (!postcode || !suburb || !location) return;
+  if (!postcode || !suburb || !location || !state) return;
   method = "delivery";
   saveForm();
 };
@@ -227,6 +238,7 @@ const onSelectLocation = function () {
   location = this.dataset.scLocation;
   postcode = null;
   suburb = null;
+  state = null;
   saveForm();
 };
 
@@ -304,7 +316,7 @@ function onShowModal(modal) {
   const saveButtonSelector = '[data-sc-action="save-postcode"]';
 
   //Initial state
-  if (suburb && postcode) {
+  if (suburb && postcode && state) {
     modal.querySelector("#autoComplete").value = `${suburb} ${postcode}`;
 
     modal.querySelector(saveButtonSelector).removeAttribute("disabled");
@@ -338,6 +350,7 @@ function onShowModal(modal) {
     postcode = selection.postcode;
     suburb = selection.suburb;
     location = selection.location;
+    state = selection.state;
 
     if (postcode && suburb && location) {
       modal

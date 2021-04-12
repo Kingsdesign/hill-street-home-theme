@@ -16,6 +16,8 @@ import { trigger } from "../util/dom-help";
 //DO NOT REMOVE THIS IMPORT - it is used
 import ModalService from "../services/modalService";
 
+window.barba = barba;
+
 /*export default {
   init() {
     // JavaScript to be fired on all pages
