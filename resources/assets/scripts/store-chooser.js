@@ -171,9 +171,8 @@ function renderDomData() {
 function haveRequiredData() {
   if (!method) return false;
   if (method === "pickup" && !location) return false;
-  if (method === "delivery" && (!location || !postcode || !suburb))
+  if (method === "delivery" && (!location || !postcode || !suburb || !state))
     return false;
-  if (!state) return false;
   return true;
 }
 
