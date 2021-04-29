@@ -5,12 +5,12 @@ namespace App\Controllers;
 //use Cloudinary;
 use Sober\Controller\Controller;
 
-\Cloudinary::config(array(
-  "cloud_name" => "hshome",
-  "api_key" => "193372732745538",
-  "api_secret" => "AfzXMSPeQL_1zMqzDKEdwgu3hHY",
-  "secure" => true,
-));
+// \Cloudinary::config(array(
+//   "cloud_name" => "hshome",
+//   "api_key" => "193372732745538",
+//   "api_secret" => "AfzXMSPeQL_1zMqzDKEdwgu3hHY",
+//   "secure" => true,
+// ));
 
 class App extends Controller {
   public function siteName() {
@@ -109,14 +109,14 @@ class App extends Controller {
    * @param $size string|array wordpress compatible size
    * @param $args
    */
-  public static function image_html($image_id, $size = 'full', $args = []) {
-    //TODO some check if cloudinary enabled
-    //echo wp_get_attachment_image($image_id, $size);
-    //$meta = wp_get_attachment_metadata($image_id);
-    $filename = basename(get_attached_file($image_id));
-    //echo 'Filename: ' . $filename;
-    echo cl_image_tag($filename, array("width" => "auto", "crop" => "scale", "responsive" => "true", "responsive_placeholder" => "blank"));
-  }
+  // public static function image_html($image_id, $size = 'full', $args = []) {
+  //   //TODO some check if cloudinary enabled
+  //   //echo wp_get_attachment_image($image_id, $size);
+  //   //$meta = wp_get_attachment_metadata($image_id);
+  //   $filename = basename(get_attached_file($image_id));
+  //   //echo 'Filename: ' . $filename;
+  //   echo cl_image_tag($filename, array("width" => "auto", "crop" => "scale", "responsive" => "true", "responsive_placeholder" => "blank"));
+  // }
 
   /**
    * Get instagram posts from simple feed
