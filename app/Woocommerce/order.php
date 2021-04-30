@@ -70,7 +70,9 @@ add_filter('woocommerce_admin_billing_fields', function ($fields) {
 
 add_action('admin_footer', function () {
   global $pagenow;
-  if (!(($pagenow === 'post.php' && get_post_type() === 'shop_order') || ($pagenow === 'post-new.php' && get_post_type() === 'shop_order'))) {
+  // if (!(($pagenow === 'post.php' && get_post_type() === 'shop_order') || ($pagenow === 'post-new.php' && get_post_type() === 'shop_order'))) {
+  if (!(($pagenow === 'post-new.php' && get_post_type() === 'shop_order'))) {
+
     return;
   }
 
