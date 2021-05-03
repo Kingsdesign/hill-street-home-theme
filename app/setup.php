@@ -45,11 +45,12 @@ add_action('wp_enqueue_scripts', function () {
 
   //if (class_exists('\WC_OrderByLocation')) {
   wp_enqueue_script('sage/store-chooser.js', asset_path('scripts/store-chooser.js'), ['jquery', 'js-cookie'], null, true);
-  wp_localize_script('sage/store-chooser.js', 'store_chooser_data', array(
+  wp_add_inline_script('sage/store-chooser.js', 'var store_chooser_data = ' . JSON_ENCODE(array(
     'locations' => $terms,
     'cookie_name' => wc_sc_cookie_name(),
+    'client_cache_version' => sanitize_title(get_field('client_cache_version', 'options')),
     'ajax_url' => admin_url('admin-ajax.php'),
-  ));
+  )) . ';', 'before');
   //}
   //}
 
@@ -218,16 +219,16 @@ add_action('after_setup_theme', function () {
    */
   sage("blade")->compiler()->directive('asset', function ($asset) {
     return "<?= " . __NAMESPACE__ . "\\asset_path({$asset}); ?>";
-  });
+});
 
-  sage("blade")->compiler()->directive("svg", function ($svgName) {
-    //$svgContent = @file_get_contents(asset_path("svg/" . $svgName . ".svg"));
-    $svgContent = @file_get_contents(get_template_directory() . "/assets/svg/" . $svgName . ".svg");
-    if (empty($svgContent)) {
-      return null;
-    }
+sage("blade")->compiler()->directive("svg", function ($svgName) {
+//$svgContent = @file_get_contents(asset_path("svg/" . $svgName . ".svg"));
+$svgContent = @file_get_contents(get_template_directory() . "/assets/svg/" . $svgName . ".svg");
+if (empty($svgContent)) {
+return null;
+}
 
-    $svgContent = str_replace("<svg", "<svg class=\"icon\" ", $svgContent);
+$svgContent = str_replace("<svg", "<svg class=\" icon\" ", $svgContent);
 
     return $svgContent;
 

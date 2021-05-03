@@ -35,15 +35,21 @@ let postcode = "";
 let suburb = "";
 let location = "";
 let state = "";
+let client_cache_version = "";
 
 if (cookieData) {
-  if (cookieData.method) method = cookieData.method;
-  if (cookieData.suburb && cookieData.postcode) {
-    suburb = cookieData.suburb;
-    postcode = cookieData.postcode;
+  if (cookieData.client_cache_version)
+    client_cache_version = cookieData.client_cache_version;
+
+  if (client_cache_version === data.client_cache_version) {
+    if (cookieData.method) method = cookieData.method;
+    if (cookieData.suburb && cookieData.postcode) {
+      suburb = cookieData.suburb;
+      postcode = cookieData.postcode;
+    }
+    if (cookieData.location) location = cookieData.location;
+    if (cookieData.state) state = cookieData.state;
   }
-  if (cookieData.location) location = cookieData.location;
-  if (cookieData.state) state = cookieData.state;
 }
 
 let initialRender = false;
@@ -177,7 +183,10 @@ function haveRequiredData() {
 }
 
 function maybeShowModal() {
-  if (!haveRequiredData()) {
+  if (
+    !haveRequiredData() ||
+    client_cache_version !== data.client_cache_version
+  ) {
     showModal();
   }
 }
@@ -213,7 +222,14 @@ const saveForm = () => {
 
   Cookies.set(
     cookieName,
-    { method, suburb, postcode, location, state },
+    {
+      method,
+      suburb,
+      postcode,
+      location,
+      state,
+      client_cache_version: data.client_cache_version,
+    },
     { expires: 365 }
   );
   Cookies.set(cookieName + "_location", location, { expires: 365 }); // we also set the cookie name + location to just the location for use with the cache key
@@ -241,7 +257,7 @@ const onSelectLocation = function () {
   saveForm();
 };
 
-const cacheName = "wc_sc_postcode";
+const cacheName = "wc_sc_postcode_" + data.client_cache_version;
 const fetchData = async (value) => {
   const cache = await caches.open(cacheName);
   let response;

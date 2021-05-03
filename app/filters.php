@@ -212,8 +212,12 @@ function postcode_to_location($postcode) {
   $fallback_location = null;
   $return_location = null;
 
+  // error_log('GET POSTCODE ' . $postcode);
+
   foreach ($locations as $location_term) {
+    // error_log("\tLocation: " . $location_term->slug);
     $is_delivery_enabled = get_field('is_delivery_enabled', $location_term);
+    // error_log("\t\tDelivery enabled: " . ($is_delivery_enabled ? 'yes' : 'no'));
     //if this location doesn't do delivery, just skip. Currently we don't actually use the 'delivery_location' (e.g. the assigned fulfilment store for this location)
     //$delivery_location = get_field('delivery_location', $location_term);
     if (!$is_delivery_enabled) {
@@ -231,6 +235,7 @@ function postcode_to_location($postcode) {
     if (!is_array($delivery_postcodes)) {
       $delivery_postcodes = [];
     }
+    // error_log("\t\tDelivery postcodes: " . print_r($delivery_postcodes, true));
 
     if (!empty($delivery_postcodes) && in_array($postcode, $delivery_postcodes)) {
       $return_location = $location_term->slug;
@@ -258,7 +263,7 @@ function ajax_postcode_search() {
   }
 
   //Try getting from cache first, API calls are slow
-  $cacheKey = 'auspost_api_postcode';
+  $cacheKey = 'auspost_api_postcode-' . sanitize_title(get_field('client_cache_version', 'options')) . '-';
   $transientKey = $cacheKey . '_' . $q;
 
   $suburbs = get_transient($transientKey);
@@ -342,19 +347,23 @@ add_action('get_header', function () {
     $id = md5($field['content']);
 
     ?>
-  <div id="site-notice-<?php echo $id; ?>" class="site-notice hidden w-full bg-yellow-200  z-50 <?php echo $field['position'] === 'top_sticky' ? 'fixed top-0 left-0' : 'relative'; ?>" data-id="<?php echo $id; ?>" data-dismissible="<?php echo $field['dismissible'] ? 'true' : 'false'; ?>">
+<div id="site-notice-<?php echo $id; ?>"
+  class="site-notice hidden w-full bg-yellow-200  z-50 <?php echo $field['position'] === 'top_sticky' ? 'fixed top-0 left-0' : 'relative'; ?>"
+  data-id="<?php echo $id; ?>" data-dismissible="<?php echo $field['dismissible'] ? 'true' : 'false'; ?>">
   <?php if ($field['dismissible']): ?>
-  <button
-			aria-label="<?php esc_html_e('Dismiss site notice', 'hillsthome');?>"
-			class="site-notice-dismiss position absolute right-0 top-0 mr-2 mt-3 w-6 h-6 text-xl flex items-center justify-center"
-		>
-			<svg class="icon" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"> <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"> </path> </svg>
-		</button>
-    <?php endif;?>
-    <div class="p-3 mr-10">
-      <?php echo $field['content']; ?>
-    </div>
+  <button aria-label="<?php esc_html_e('Dismiss site notice', 'hillsthome');?>"
+    class="site-notice-dismiss position absolute right-0 top-0 mr-2 mt-3 w-6 h-6 text-xl flex items-center justify-center">
+    <svg class="icon" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em"
+      width="1em" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z">
+      </path>
+    </svg>
+  </button>
+  <?php endif;?>
+  <div class="p-3 mr-10">
+    <?php echo $field['content']; ?>
   </div>
-    <?php
+</div>
+<?php
 }
 });
