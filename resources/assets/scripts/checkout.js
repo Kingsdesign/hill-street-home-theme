@@ -252,7 +252,8 @@ function restrictDatePicker() {
       location === "devonport" &&
       method === "delivery" &&
       +cookieData.postcode !== 7310 &&
-      (isSunday(showDate) || isSaturday(showDate))
+      isSaturday(showDate)
+      // (isSunday(showDate) || isSaturday(showDate)) // DEVNOPORT DELIVERY TEMP MOTHERSDAY
     ) {
       isEnabled = false;
     }
